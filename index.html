@@ -230,9 +230,12 @@
     }
   }catch(e){}
 
+  // ✅ FIX: WebView ایتا برای لینک‌های eitaa بهتره openEitaaLink اولویت داشته باشه
   function openEitaaLinkSafe(url){
+    const isEitaa = /^https?:\/\/(www\.)?eitaa\.com\//i.test(url);
     try{
       if(EWA){
+        if(isEitaa && typeof EWA.openEitaaLink==="function"){ EWA.openEitaaLink(url); return; }
         if(typeof EWA.openLink==="function"){ EWA.openLink(url); return; }
         if(typeof EWA.openEitaaLink==="function"){ EWA.openEitaaLink(url); return; }
       }
@@ -246,7 +249,7 @@
     image:"https://cdnfa.com/irangiah/a9be/uploads/ads/tankads.webp",
     link:"https://eitaa.com/tavita_ads",
     autoHideMs:5200,
-    minGapSec:22,
+    minGapSec:14,          // ✅ بیشتر دیده بشه ولی اسپم نشه
     showOnPause:true,
     showOnGoal:true,
     showOnTimeEnd:true,
@@ -311,7 +314,7 @@
     time: document.getElementById("time"),
   };
 
-  // ✅ Tavita stays Tavita
+  // ✅ طاویتا همون طاویتا
   ui.tavitaBtn.addEventListener("click", ()=>openEitaaLinkSafe("https://eitaa.com/tavita"));
 
   // toast
@@ -364,25 +367,46 @@
 
   ui.soundBtn.addEventListener("click", ()=>{ soundOn=!soundOn; syncUI(); toast(soundOn?"🔊":"🔇"); });
 
-  // pause / overlay
+  // ==================== pause / overlay (FIX freeze) ====================
   let paused=false, running=true, inEndScreen=false;
-  function openOverlay(title, desc){
+  let overlayType="pause"; // "pause" | "end"
+
+  function openOverlay(title, desc, type){
+    overlayType = type || "pause";
     ui.overlayTitle.textContent=title;
     ui.overlayDesc.textContent=desc || " ";
     ui.pauseOverlay.style.display="flex";
+    ui.resumeBtn.textContent = (overlayType==="end") ? "شروع مجدد" : "ادامه";
   }
   function closeOverlay(){ ui.pauseOverlay.style.display="none"; }
 
   function openPause(){
     paused=true; inEndScreen=false;
-    openOverlay("مکث ⏸","تبلیغ فقط در مکث/گل/پایان نمایش داده می‌شود ✅");
+    openOverlay("مکث ⏸","تبلیغ فقط در مکث/گل/پایان نمایش داده می‌شود ✅","pause");
     syncUI();
     if(ADS.showOnPause) showAd();
   }
+
+  // اینها جلوتر تعریف می‌شوند ولی از hoisting مشکلی نیست
+  function hardRestart(){
+    closeOverlay();
+    hideAd();
+    paused=false; running=true; inEndScreen=false;
+    timeLeft=60;
+    if(mode===MODES.solo) soloResetAll(); else pvpResetAll();
+    syncUI();
+  }
+
   function resume(){
+    // ✅ اگر پایان بازیه یا running=false => “ادامه” باید ریست کنه، نه Resume
+    if(overlayType==="end" || inEndScreen || !running){
+      hardRestart();
+      return;
+    }
     closeOverlay(); paused=false; inEndScreen=false;
     hideAd(); syncUI();
   }
+
   ui.pauseBtn.addEventListener("click", ()=> paused ? resume() : openPause());
   ui.resumeBtn.addEventListener("click", resume);
   ui.closePauseBtn.addEventListener("click", ()=>{ closeOverlay(); hideAd(); });
@@ -432,7 +456,6 @@
     ctx.strokeStyle="rgba(20,24,35,.50)";
     ctx.fillStyle="#0b0f18";
 
-    // pentagon
     ctx.beginPath();
     for(let i=0;i<5;i++){
       const a=-Math.PI/2+i*(Math.PI*2/5);
@@ -441,7 +464,6 @@
     }
     ctx.closePath(); ctx.fill(); ctx.stroke();
 
-    // surrounding panels
     for(let k=0;k<5;k++){
       const ang=-Math.PI/2+k*(Math.PI*2/5);
       const cx=Math.cos(ang)*r*0.54, cy=Math.sin(ang)*r*0.54;
@@ -454,7 +476,6 @@
       ctx.closePath(); ctx.fill(); ctx.stroke();
     }
 
-    // highlight
     ctx.globalAlpha=0.22;
     ctx.fillStyle="#fff";
     ctx.beginPath(); ctx.arc(-r*0.35,-r*0.42,r*0.22,0,Math.PI*2); ctx.fill();
@@ -490,11 +511,9 @@
     ctx.beginPath(); ctx.roundRect(x,y,w,h,r);
   }
 
-  // one goal renderer (symmetry)
   function drawGoalFrame({x,y,w,h,depth,flip,ripple=null,glow="rgba(255,255,255,.26)"}){
     ctx.save();
 
-    // ground shadow
     ctx.globalAlpha=0.18;
     ctx.fillStyle="rgba(0,0,0,.65)";
     const dy = flip ? -depth : depth;
@@ -502,7 +521,6 @@
     ctx.fill();
     ctx.globalAlpha=1;
 
-    // frame
     ctx.shadowColor=glow;
     ctx.shadowBlur=10;
     ctx.lineWidth=4;
@@ -515,7 +533,6 @@
     ctx.stroke();
     ctx.shadowBlur=0;
 
-    // net
     ctx.globalAlpha=0.24;
     ctx.lineWidth=1;
     ctx.strokeStyle="rgba(255,255,255,.60)";
@@ -539,7 +556,6 @@
     }
     ctx.globalAlpha=1;
 
-    // ripple
     if(ripple){
       ctx.globalAlpha=Math.max(0, 0.65 - ripple.age*1.1);
       ctx.strokeStyle="rgba(34,197,94,.95)";
@@ -592,6 +608,8 @@
     lastOutcome:""
   };
 
+  let soloNonGoalStreak=0; // ✅ برای تبلیغ هوشمند (نه اسپم)
+
   function soloResetShot(){
     solo.player.x=W/2; solo.player.y=H*0.82;
 
@@ -618,16 +636,16 @@
 
   function soloResetAll(){
     solo.score=0; solo.goals=0; solo.streak=0; solo.lastOutcome="";
+    soloNonGoalStreak=0;
     soloResetShot();
   }
 
   function keeperDifficulty(){
-    // adaptive: streak بالا => کمی سخت‌تر
     const s = clamp(solo.streak,0,10);
     return {
       react: clamp(0.42 + s*0.012, 0.42, 0.56),
-      chaos: clamp(12 - s*0.8, 3, 12),      // پیش‌بینی دقیق‌تر
-      centerBias: clamp(0.22 + s*0.01, 0.22, 0.30) // مرکز سخت‌تر
+      chaos: clamp(12 - s*0.8, 3, 12),
+      centerBias: clamp(0.22 + s*0.01, 0.22, 0.30)
     };
   }
 
@@ -638,15 +656,11 @@
     const gx1=(W-S.soloGoalW)/2;
     const gx2=gx1+S.soloGoalW;
 
-    // پیش‌بینی: بیشتر به سمت مرکز/گوشه‌ها می‌ره
-    // شوت‌های کات‌دار پیش‌بینی رو کمی خراب می‌کنه
     const aim = solo._predictedAimX || (W/2);
     const curveNoise = (Math.random()*2-1) * (4 + Math.min(12, Math.abs(solo.ball.spin)*6));
     const chaos = (Math.random()*2-1) * g.chaos;
 
     let predict = aim + chaos + curveNoise;
-
-    // clamp داخل دهانه (با لحاظ عرض دروازه‌بان)
     predict = clamp(predict, gx1+solo.keeper.w/2+10, gx2-solo.keeper.w/2-10);
     solo.keeper.targetX=predict;
 
@@ -660,7 +674,6 @@
     if(!solo.ball.stuck) solo.keeper.diveT = clamp(solo.keeper.diveT + 0.08*k, 0, 1);
     else                 solo.keeper.diveT = clamp(solo.keeper.diveT - 0.12*k, 0, 1);
 
-    // dive offset
     const dx = (solo.keeper.targetX - W/2) * 0.18 * solo.keeper.diveT;
     const dy = -solo.keeper.diveT * 10;
     solo.keeper._cx = solo.keeper.x + dx;
@@ -682,7 +695,6 @@
     hideAd();
     if(!solo.ball.stuck || solo.resolving) return;
 
-    // Prevent "drop = goal" (must pull enough)
     if(mag < 135){
       toast("👆 محکم‌تر بکش");
       return;
@@ -692,25 +704,19 @@
     solo.shotAge=0;
     solo.resolving=false;
 
-    // Aim target point from drag end (so user feels control)
-    // Pull down -> shot goes up (we invert direction)
     const power = clamp(mag, 135, 620);
     const base  = power * 0.0285;
 
-    // normalize
     const nx=dx/(power||1), ny=dy/(power||1);
 
-    // velocity
     solo.ball.vx = nx * base;
     solo.ball.vy = ny * base;
 
-    // curve based on horizontal pull (skill)
     solo.ball.spin = clamp(nx*3.9, -4.0, 4.0);
 
-    // predicted aim x for keeper: where ball would cross mouth without curve
     const gx1=(W-S.soloGoalW)/2;
     const mouthY = (S.margin+18) + S.soloGoalH;
-    const t = Math.max(0.02, (solo.ball.y - mouthY) / Math.max(0.001, -solo.ball.vy)); // time to mouth
+    const t = Math.max(0.02, (solo.ball.y - mouthY) / Math.max(0.001, -solo.ball.vy));
     solo._predictedAimX = clamp(solo.ball.x + solo.ball.vx*t, gx1+10, gx1+S.soloGoalW-10);
 
     solo.score += 1;
@@ -735,15 +741,13 @@
     if(timeLeft<=0){
       timeLeft=0; running=false; paused=true;
       inEndScreen=true;
-      openOverlay("پایان بازی ⏱","پنالتی تموم شد! می‌خوای دوباره شروع کنی؟");
+      openOverlay("پایان بازی ⏱","پنالتی تموم شد! می‌خوای دوباره شروع کنی؟","end");
       if(ADS.showOnTimeEnd) showAd();
       return;
     }
 
-    // keeper always
     soloStepKeeper(dt);
 
-    // particles
     for(let i=solo.particles.length-1;i>=0;i--){
       const p=solo.particles[i];
       p.life-=dt;
@@ -763,49 +767,43 @@
     solo.shotAge += dt;
     if(solo.shotAge > 2.2){
       solo.streak=0;
+      soloNonGoalStreak++;
       sfxMiss(); vibr(14); toast("😅 دیر شد!");
+      if(soloNonGoalStreak>=2) showAd();
       soloFinish("timeout");
       return;
     }
 
     solo.keeper.saveCooldown = Math.max(0, solo.keeper.saveCooldown - dt);
 
-    // curve & micro-noise
     if(solo.ball.vy < 0){
       const nearGoal = clamp(1 - (solo.ball.y / (H*0.62)), 0, 1);
       solo.ball.vx += solo.ball.spin * (0.052 + nearGoal*0.018) * (dt*60);
       solo.ball.vx += (Math.random()*2-1) * 0.006 * (dt*60);
     }
 
-    // integrate
     solo.ball.x += solo.ball.vx*(dt*60);
     solo.ball.y += solo.ball.vy*(dt*60);
     solo.ball.vx *= 0.994;
     solo.ball.vy *= 0.994;
     solo.ball.spin *= 0.992;
 
-    // trail
     solo.ball.trail.push({x:solo.ball.x,y:solo.ball.y,a:1});
     if(solo.ball.trail.length>24) solo.ball.trail.shift();
     for(const t of solo.ball.trail) t.a *= 0.92;
 
-    // goal geometry
     const gx1=(W-S.soloGoalW)/2;
     const gy=S.margin+18;
     const gx2=gx1+S.soloGoalW;
     const mouthY = gy + S.soloGoalH;
 
-    // posts
     const postLx = gx1;
     const postRx = gx2;
 
-    // keeper hitboxes
     const kx=solo.keeper._cx, ky=solo.keeper._cy;
     const body={x:kx-solo.keeper.w/2, y:ky-solo.keeper.h/2, w:solo.keeper.w, h:solo.keeper.h};
     const head={x:kx, y:ky-solo.keeper.h/2-solo.keeper.headR+2, r:solo.keeper.headR};
 
-    // Collision with posts/crossbar (register as "post", bounce, then finish)
-    // crossbar at y=gy
     const crossbarY = gy;
     const nearX = (solo.ball.x >= postLx - 6 && solo.ball.x <= postRx + 6);
     const hitCrossbar = nearX && (Math.abs((solo.ball.y - solo.ball.r) - crossbarY) < 6) && solo.ball.vy < 0;
@@ -815,60 +813,68 @@
 
     if(hitCrossbar || hitLeftPost || hitRightPost){
       sfxPost(); vibr(12); toast("🥶 تیر!");
-      // bounce a bit then finish (counts as miss, streak reset)
       solo.streak=0;
+      soloNonGoalStreak++;
+      if(soloNonGoalStreak>=2) showAd();
       if(hitCrossbar) solo.ball.vy = Math.abs(solo.ball.vy) * 0.65;
       if(hitLeftPost || hitRightPost) solo.ball.vx *= -0.75;
       soloFinish("post");
       return;
     }
 
-    // Keeper collision => SAVE
     const hitBody = circleRectHit(solo.ball.x,solo.ball.y,solo.ball.r, body.x,body.y,body.w,body.h);
     const hitHead = dist(solo.ball.x,solo.ball.y, head.x,head.y) <= (solo.ball.r+head.r);
 
     if(solo.keeper.saveCooldown<=0 && (hitBody || hitHead)){
       solo.streak=0;
+      soloNonGoalStreak++;
       sfxSave(); vibr(18); toast("🧤 سیو شد!");
+      if(soloNonGoalStreak>=2) showAd();
       soloFinish("save");
       return;
     }
 
-    // ====== Goal logic (skill + not silly) ======
     const insideMouthX = (solo.ball.x >= gx1+10 && solo.ball.x <= gx2-10);
     const crossesMouth = (solo.ball.y - solo.ball.r) <= mouthY && solo.ball.vy < 0;
 
-    // difficulty: center is harder (keeper almost covers)
     const g = keeperDifficulty();
     const gxMid = gx1 + S.soloGoalW/2;
     const centerHard = Math.abs(solo.ball.x - gxMid) < (S.soloGoalW * g.centerBias);
 
     const speed = Math.hypot(solo.ball.vx, solo.ball.vy);
-    const strongEnough = speed > 3.65; // must have pace
+    const strongEnough = speed > 3.65;
 
-    // If ball crosses mouth area but centerHard => treat as SAVE/MISS (not goal)
     if(crossesMouth && insideMouthX){
       if(!strongEnough){
-        solo.streak=0; sfxMiss(); toast("ضعیف بود 😅"); soloFinish("weak"); return;
+        solo.streak=0; soloNonGoalStreak++;
+        sfxMiss(); toast("ضعیف بود 😅");
+        if(soloNonGoalStreak>=2) showAd();
+        soloFinish("weak"); return;
       }
       if(centerHard){
-        // center shot is usually saved
-        solo.streak=0; sfxSave(); toast("🧤 وسط رو گرفت!"); soloFinish("centerSaved"); return;
+        solo.streak=0; soloNonGoalStreak++;
+        sfxSave(); toast("🧤 وسط رو گرفت!");
+        if(soloNonGoalStreak>=2) showAd();
+        soloFinish("centerSaved"); return;
       }
-      // Goal!
+
       solo.goals++;
       solo.streak++;
+      soloNonGoalStreak=0;
+
       solo.score += 12 + Math.min(24, solo.streak*2);
 
       solo.ripple = {x:solo.ball.x, y:mouthY+8, age:0};
       soloMakeParticles(solo.ball.x, mouthY+10);
+
+      // ✅ تبلیغ هوشمند: هر 3 گل یکبار (علاوه بر showOnGoal)
+      if(solo.goals>0 && solo.goals%3===0) showAd();
 
       goalHype(solo.streak>=4 ? "سوپر گل! ⚽👑" : "گلللل! ⚽🔥");
       soloFinish("goal");
       return;
     }
 
-    // bounds / miss
     const minX=S.margin+solo.ball.r, maxX=W-S.margin-solo.ball.r;
     const minY=S.margin+solo.ball.r, maxY=H-S.margin-solo.ball.r;
 
@@ -878,7 +884,9 @@
 
     if(solo.ball.y>maxY){
       solo.streak=0;
+      soloNonGoalStreak++;
       sfxMiss(); vibr(16); toast("😅 اوت شد");
+      if(soloNonGoalStreak>=2) showAd();
       soloFinish("out");
     }
   }
@@ -891,22 +899,18 @@
 
     drawGoalFrame({x:gx1,y:gy,w:S.soloGoalW,h:S.soloGoalH,depth:S.soloGoalDepth,flip:false,ripple:solo.ripple});
 
-    // penalty box
     ctx.globalAlpha=0.55;
     ctx.strokeStyle="rgba(255,255,255,.42)";
     ctx.lineWidth=2;
     ctx.strokeRect(W/2 - S.soloGoalW*0.82, S.margin+8, S.soloGoalW*1.64, 140);
     ctx.globalAlpha=1;
 
-    // keeper draw (more "real")
     const x=solo.keeper._cx, y=solo.keeper._cy;
 
-    // shadow
     ctx.globalAlpha=0.22; ctx.fillStyle="#000";
     ctx.beginPath(); ctx.ellipse(x, y+26, 38, 11, 0, 0, Math.PI*2); ctx.fill();
     ctx.globalAlpha=1;
 
-    // jersey
     const bodyG=ctx.createLinearGradient(x-70,y-30,x+70,y+30);
     bodyG.addColorStop(0,"rgba(59,130,246,.95)");
     bodyG.addColorStop(1,"rgba(147,197,253,.70)");
@@ -914,14 +918,12 @@
     rr(x-solo.keeper.w/2, y-solo.keeper.h/2, solo.keeper.w, solo.keeper.h, 12);
     ctx.fill();
 
-    // head
     const skin=ctx.createRadialGradient(x-4,y-12,2,x,y-10,16);
     skin.addColorStop(0,"rgba(255,224,189,.98)");
     skin.addColorStop(1,"rgba(230,190,150,.96)");
     ctx.fillStyle=skin;
     ctx.beginPath(); ctx.arc(x, y-solo.keeper.h/2-solo.keeper.headR+2, solo.keeper.headR, 0, Math.PI*2); ctx.fill();
 
-    // arms + gloves
     ctx.strokeStyle="rgba(226,232,240,.95)";
     ctx.lineWidth=6; ctx.lineCap="round";
     const arm=solo.keeper.diveT*18;
@@ -936,7 +938,6 @@
     ctx.beginPath(); ctx.arc(x-solo.keeper.w*0.60-arm, y-2, 8.4, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(x+solo.keeper.w*0.60-arm, y-2, 8.4, 0, Math.PI*2); ctx.fill();
 
-    // particles
     for(const p of solo.particles){
       ctx.globalAlpha=Math.max(0,p.a)*0.9;
       ctx.fillStyle="rgba(255,255,255,.95)";
@@ -944,7 +945,6 @@
     }
     ctx.globalAlpha=1;
 
-    // trail
     for(const t of solo.ball.trail){
       ctx.globalAlpha=(t.a||0.4)*0.55;
       ctx.beginPath(); ctx.arc(t.x,t.y, solo.ball.r+9, 0, Math.PI*2);
@@ -952,10 +952,8 @@
     }
     ctx.globalAlpha=1;
 
-    // ball
     drawSoccerBall(solo.ball.x, solo.ball.y, solo.ball.r, solo.ball.spin);
 
-    // aim UI
     if(drag.active){
       const dx = drag.start.x - drag.now.x;
       const dy = drag.start.y - drag.now.y;
@@ -985,9 +983,11 @@
     p1:{x:0,y:0,r:20},
     p2:{x:0,y:0,r:20},
     s1:0,s2:0,
-    maxGoals:7, // first to 7
+    maxGoals:7,
     ended:false
   };
+
+  let pvpGoalCount=0; // ✅ برای تبلیغ هوشمند
 
   function pvpResetField(){
     pvp.ball.x=W/2; pvp.ball.y=H/2;
@@ -998,6 +998,7 @@
 
   function pvpResetAll(){
     pvp.s1=0; pvp.s2=0; pvp.ended=false;
+    pvpGoalCount=0;
     pvpResetField();
   }
 
@@ -1013,7 +1014,6 @@
       pvp.ball.vx += nx*impulse;
       pvp.ball.vy += ny*impulse;
 
-      // spin a bit
       pvp.ball.spin += nx*0.55;
 
       sfxKick(); vibr(8);
@@ -1025,15 +1025,18 @@
     if(pvp.ended) return;
     if(whose===1) pvp.s1++; else pvp.s2++;
 
+    pvpGoalCount++;
+    // ✅ هر 2 گل یکبار بنر (تجاری‌تر ولی کنترل‌شده)
+    if(pvpGoalCount%2===0) showAd();
+
     goalHype(whose===1 ? "گل برای بازیکن ۱ 🟢⚽" : "گل برای بازیکن ۲ 🔵⚽");
 
-    // check win
     if(pvp.s1>=pvp.maxGoals || pvp.s2>=pvp.maxGoals){
       pvp.ended=true;
       running=false; paused=true; inEndScreen=true;
 
       const winner = (pvp.s1>pvp.s2) ? "بازیکن ۱ 🟢" : "بازیکن ۲ 🔵";
-      openOverlay("پایان بازی 🎉", `${winner} برنده شد!  (${pvp.s1} - ${pvp.s2})`);
+      openOverlay("پایان بازی 🎉", `${winner} برنده شد!  (${pvp.s1} - ${pvp.s2})`, "end");
       if(ADS.showOnWin) showAd();
       return;
     }
@@ -1042,7 +1045,6 @@
   }
 
   function pvpUpdate(dt){
-    // also time-based end (backup)
     timeLeft -= dt;
     if(timeLeft<=0){
       timeLeft=0; running=false; paused=true; inEndScreen=true;
@@ -1050,7 +1052,7 @@
       let msg;
       if(pvp.s1===pvp.s2) msg=`مساوی! (${pvp.s1} - ${pvp.s2})`;
       else msg=`برنده: ${(pvp.s1>pvp.s2)?"بازیکن ۱ 🟢":"بازیکن ۲ 🔵"}  (${pvp.s1} - ${pvp.s2})`;
-      openOverlay(title, msg);
+      openOverlay(title, msg, "end");
       if(ADS.showOnTimeEnd) showAd();
       return;
     }
@@ -1058,31 +1060,25 @@
     pvpKick(pvp.p1, 6.9);
     pvpKick(pvp.p2, 6.9);
 
-    // integrate
     pvp.ball.x += pvp.ball.vx*(dt*60);
     pvp.ball.y += pvp.ball.vy*(dt*60);
 
-    // curve from spin
     pvp.ball.vx += pvp.ball.spin * 0.010 * (dt*60);
     pvp.ball.spin *= 0.991;
 
-    // friction
     pvp.ball.vx *= 0.987;
     pvp.ball.vy *= 0.987;
 
-    // trail
     pvp.ball.trail.push({x:pvp.ball.x,y:pvp.ball.y,a:1});
     if(pvp.ball.trail.length>22) pvp.ball.trail.shift();
     for(const t of pvp.ball.trail) t.a*=0.92;
 
-    // goal geometry
     const gx1=(W-S.pvpGoalW)/2;
     const gx2=gx1+S.pvpGoalW;
 
     const topMouth = S.margin + S.pvpGoalH;
     const botMouth = H - S.margin - S.pvpGoalH;
 
-    // scoring: must cross mouth with direction + inside X
     if(pvp.ball.x>gx1+7 && pvp.ball.x<gx2-7){
       if(pvp.ball.y - pvp.ball.r <= topMouth && pvp.ball.vy < 0){
         pvpGoal(1); return;
@@ -1092,7 +1088,6 @@
       }
     }
 
-    // bounds
     const minX=S.margin+pvp.ball.r, maxX=W-S.margin-pvp.ball.r;
     const minY=S.margin+pvp.ball.r, maxY=H-S.margin-pvp.ball.r;
 
@@ -1107,7 +1102,6 @@
   function pvpDraw(){
     drawField();
 
-    // midfield line
     ctx.globalAlpha=0.55;
     ctx.beginPath(); ctx.moveTo(18,H/2); ctx.lineTo(W-18,H/2);
     ctx.strokeStyle="rgba(255,255,255,.7)";
@@ -1116,11 +1110,9 @@
 
     const gx1=(W-S.pvpGoalW)/2;
 
-    // identical goals, mirrored
     drawGoalFrame({x:gx1,y:S.margin,w:S.pvpGoalW,h:S.pvpGoalH,depth:S.pvpGoalDepth,flip:true});
     drawGoalFrame({x:gx1,y:H-S.margin-S.pvpGoalH,w:S.pvpGoalW,h:S.pvpGoalH,depth:S.pvpGoalDepth,flip:false});
 
-    // trail glow
     for(const t of pvp.ball.trail){
       ctx.globalAlpha=(t.a||0.4)*0.55;
       ctx.beginPath(); ctx.arc(t.x,t.y, pvp.ball.r+8, 0, Math.PI*2);
@@ -1129,22 +1121,18 @@
     }
     ctx.globalAlpha=1;
 
-    // ball
     drawSoccerBall(pvp.ball.x,pvp.ball.y,pvp.ball.r,pvp.ball.spin);
 
-    // players (more visible)
     function drawPlayer(pl, fill, label){
       ctx.save();
       ctx.fillStyle=fill;
       ctx.beginPath(); ctx.arc(pl.x,pl.y,pl.r,0,Math.PI*2); ctx.fill();
 
-      // shine
       ctx.globalAlpha=0.18;
       ctx.fillStyle="#fff";
       ctx.beginPath(); ctx.arc(pl.x-7,pl.y-7,pl.r*0.55,0,Math.PI*2); ctx.fill();
       ctx.globalAlpha=1;
 
-      // label
       ctx.fillStyle="rgba(0,0,0,.45)";
       ctx.beginPath(); ctx.arc(pl.x,pl.y,pl.r*0.56,0,Math.PI*2); ctx.fill();
       ctx.fillStyle="rgba(255,255,255,.95)";
@@ -1161,7 +1149,7 @@
 
   // ==================== Input ====================
   const drag={active:false,start:null,now:null};
-  const pointers=new Map(); // for pvp
+  const pointers=new Map();
 
   cv.addEventListener("pointerdown",(e)=>{
     if(!running || paused) return;
@@ -1175,7 +1163,6 @@
       return;
     }
 
-    // pvp: touch your half controls your player
     if(p.y > H/2){
       pointers.set(e.pointerId,{who:"p1"});
       pvp.p1.x=clamp(p.x, S.margin+pvp.p1.r, W-S.margin-pvp.p1.r);
@@ -1289,10 +1276,6 @@
     resize();
     setMode(mode);
   });
-
-  // If overlay is end-screen, restart button should be obvious:
-  ui.resumeBtn.textContent = "ادامه";
-  ui.closePauseBtn.textContent = "بستن";
 
   // ==================== Loop ====================
   function tick(now){
