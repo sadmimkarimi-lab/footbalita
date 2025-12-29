@@ -12,6 +12,17 @@
     *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
     html,body{height:100%;background:#070b14;color:#fff;overflow:hidden}
 
+    :root{
+      --fs-xs: clamp(12px, 2.2vw, 14px);
+      --fs-sm: clamp(13px, 2.35vw, 15px);
+      --fs-md: clamp(14px, 2.6vw, 17px);
+      --fs-lg: clamp(16px, 3.0vw, 20px);
+      --fs-xl: clamp(20px, 4.6vw, 34px);
+      --fs-xxl: clamp(24px, 5.8vw, 44px);
+      --radius: 18px;
+    }
+    body{font-size:var(--fs-md);}
+
     .app{height:100%;display:flex;flex-direction:column;max-width:680px;margin:0 auto;padding:6px;gap:6px}
     .glass{
       background:rgba(255,255,255,.085);
@@ -36,19 +47,19 @@
       50%{transform:translateY(-3px) rotate(5deg)}
     }
     .titles{display:flex;flex-direction:column;gap:1px;min-width:0}
-    .name{font-weight:1000;font-size:12.5px;line-height:1.05}
-    .tag{opacity:.86;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:330px}
+    .name{font-weight:1000;font-size:clamp(14px, 2.9vw, 18px);line-height:1.1;letter-spacing:.2px}
+    .tag{opacity:.88;font-size:clamp(12px, 2.3vw, 14px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:360px}
 
     .btn{
-      border:none;border-radius:12px;padding:6px 8px;font-weight:1000;cursor:pointer;
+      border:none;border-radius:14px;padding:9px 11px;font-weight:1000;cursor:pointer;
       background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.14);
-      font-size:11px;line-height:1;user-select:none;white-space:nowrap;
+      font-size:clamp(12px, 2.3vw, 14px);line-height:1;user-select:none;white-space:nowrap;
       transition:all .15s ease;
     }
     .btn:active{transform:scale(.96)}
     .btn.primary{background:linear-gradient(135deg,#22c55e,#a3e635);color:#071022;border:none;box-shadow:0 4px 12px rgba(34,197,94,.3)}
     .btn.danger{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.35)}
-    .btn.icon{padding:6px 7px;min-width:36px;text-align:center;font-size:13px}
+    .btn.icon{padding:9px 10px;min-width:44px;text-align:center;font-size:clamp(14px, 2.8vw, 16px)}
     .btn.pill{border-radius:999px}
     .modeBtn.active{background:rgba(34,197,94,.22);border-color:rgba(34,197,94,.35);box-shadow:0 0 12px rgba(34,197,94,.2)}
 
@@ -63,11 +74,11 @@
     .pill{
       background:rgba(255,255,255,.08);
       border:1px solid rgba(255,255,255,.12);
-      padding:4px 8px;border-radius:999px;font-weight:1000;font-size:10.5px;
+      padding:7px 10px;border-radius:999px;font-weight:1000;font-size:clamp(12px, 2.3vw, 14px);
       display:flex;gap:6px;align-items:center;white-space:nowrap;
       transition:all .2s ease;
     }
-    .pill strong{font-size:11.5px}
+    .pill strong{font-size:clamp(13px, 2.5vw, 16px)}
     .scorePill{
       padding:4px 9px;
       border-color:rgba(255,255,255,.18);
@@ -93,17 +104,17 @@
     canvas{width:100%;height:100%;display:block;touch-action:none}
 
     .hint{
-      opacity:.92;font-size:10.5px;text-align:center;line-height:1.65;
+      opacity:.92;font-size:clamp(12px, 2.35vw, 14px);text-align:center;line-height:1.75;
       background:rgba(255,255,255,.05);
       border:1px solid rgba(255,255,255,.10);
       border-radius:14px;padding:6px 8px;
     }
 
     .toast{
-      position:fixed;left:50%;top:10.5%;transform:translateX(-50%);
+      position:fixed;left:50%;top:9%;transform:translateX(-50%);
       background:rgba(0,0,0,.58);border:1px solid rgba(255,255,255,.12);
-      padding:9px 10px;border-radius:12px;z-index:99999;
-      font-weight:1000;font-size:11px;opacity:0;pointer-events:none;
+      padding:12px 14px;border-radius:14px;z-index:99999;
+      font-weight:1000;font-size:clamp(13px, 2.6vw, 16px);opacity:0;pointer-events:none;
       transition:opacity .18s ease, transform .18s ease;
       max-width:min(92vw,560px);text-align:center;direction:rtl
     }
@@ -205,6 +216,61 @@
       50%{transform:translate(-50%,-50%) scale(1.2)}
       100%{transform:translate(-50%,-50%) scale(1)}
     }
+
+    /* Big match-style event banner */
+    .eventBanner{
+      position:fixed;
+      left:50%;
+      top:22%;
+      transform:translate(-50%,-50%) scale(.86);
+      opacity:0;
+      z-index:100000;
+      pointer-events:none;
+      padding:14px 18px;
+      border-radius:18px;
+      text-align:center;
+      direction:rtl;
+      font-weight:1000;
+      font-size:var(--fs-xxl);
+      letter-spacing:.2px;
+      text-shadow:0 10px 30px rgba(0,0,0,.65), 0 0 22px rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.14);
+      backdrop-filter:blur(8px);
+      box-shadow:0 18px 90px rgba(0,0,0,.55);
+      max-width:min(92vw, 620px);
+      line-height:1.15;
+    }
+    .eventBanner.neutral{background:rgba(0,0,0,.55)}
+    .eventBanner.good{
+      background:linear-gradient(135deg, rgba(34,197,94,.92), rgba(163,230,53,.92));
+      color:#071022;border:none;
+      box-shadow:0 20px 120px rgba(34,197,94,.30);
+      text-shadow:0 10px 30px rgba(0,0,0,.45);
+    }
+    .eventBanner.warn{
+      background:linear-gradient(135deg, rgba(249,115,22,.92), rgba(250,204,21,.92));
+      color:#071022;border:none;
+      box-shadow:0 20px 120px rgba(249,115,22,.25);
+      text-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    .eventBanner.bad{
+      background:linear-gradient(135deg, rgba(239,68,68,.92), rgba(244,63,94,.92));
+      color:#071022;border:none;
+      box-shadow:0 20px 120px rgba(239,68,68,.22);
+      text-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    .eventBanner.show{
+      opacity:1;
+      animation:eventPop .95s ease forwards;
+    }
+    @keyframes eventPop{
+      0%{opacity:0;transform:translate(-50%,-50%) scale(.65)}
+      14%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}
+      55%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+      100%{opacity:0;transform:translate(-50%,-68%) scale(.96)}
+    }
+
+
   </style>
 </head>
 
@@ -260,6 +326,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="eventBanner neutral" id="eventBanner"></div>
 
 <div class="overlay" id="pauseOverlay">
   <div class="card">
@@ -378,6 +445,7 @@
     powerMeter: document.getElementById("powerMeter"),
     powerBar: document.getElementById("powerBar"),
     comboDisplay: document.getElementById("comboDisplay"),
+    eventBanner: document.getElementById("eventBanner"),
   };
 
   ui.tavitaBtn.addEventListener("click", ()=>openEitaaLinkSafe("https://eitaa.com/tavita"));
@@ -391,6 +459,23 @@
     clearTimeout(toastTimer);
     toastTimer=setTimeout(()=>toastEl.classList.remove("show"),980);
   }
+
+  // Big event banner (for key match moments)
+  let eventTimer=null;
+  function hype(msg, tone="neutral", ms=920){
+    if(!ui.eventBanner) return toast(msg);
+    ui.eventBanner.textContent = msg;
+    ui.eventBanner.classList.remove("good","warn","bad","neutral","show");
+    ui.eventBanner.classList.add(tone || "neutral");
+
+    // Restart animation reliably
+    void ui.eventBanner.offsetWidth;
+    ui.eventBanner.classList.add("show");
+
+    clearTimeout(eventTimer);
+    eventTimer=setTimeout(()=>ui.eventBanner.classList.remove("show"), ms);
+  }
+
 
   // Combo display
   function showCombo(text){
@@ -798,43 +883,36 @@
     pvpGoalDepth:22,
   };
   function computeSizes(){
-    S.soloGoalW = clamp(Math.floor(W*0.50), 210, 300);
-    S.pvpGoalW  = clamp(Math.floor(W*0.38), 160, 240);
+    S.margin = Math.max(16, Math.min(22, W*0.035));
+    S.soloGoalW = clamp(W*0.56, 210, 280);
+    S.soloGoalH = clamp(H*0.085, 46, 70);
+    S.soloGoalDepth = clamp(W*0.075, 26, 40);
+    S.pvpGoalW = clamp(W*0.48, 190, 260);
+    S.pvpGoalH = clamp(H*0.06, 24, 44);
+    S.pvpGoalDepth = clamp(W*0.06, 18, 32);
   }
 
-  // ==================== Modes & timer ====================
-  const MODES={solo:"solo",pvp:"pvp"};
+  // ==================== Game State ====================
+  const MODES={solo:"solo", pvp:"pvp"};
   let mode=MODES.solo;
-  let timeLeft=60, lastT=performance.now();
 
-  // ==================== SOLO (Enhanced Penalty) ====================
+  // -------------------- Solo (Penalty) --------------------
   const solo = {
+    score:0, goals:0, streak:0, bestStreak:0, totalShots:0, accuracy:0,
+    lastOutcome:"",
+    ball:{x:0,y:0,r:10,vx:0,vy:0,spin:0,stuck:true,trail:[]},
     player:{x:0,y:0,r:18},
-    ball:{x:0,y:0,r:12,vx:0,vy:0,spin:0,stuck:true,trail:[]},
-    keeper:{
-      x:0,y:0,w:88,h:30,headR:10,
-      react:0.48,targetX:0,diveT:0,
-      saveCooldown:0,_cx:0,_cy:0,
-      anticipation:0
-    },
+    keeper:{x:0,y:0,w:66,h:16,headR:9,targetX:0,react:0.55,diveT:0,saveCooldown:0,anticipation:0,_cx:0,_cy:0},
     ripple:null,
     particles:[],
-    score:0,
-    goals:0,
-    streak:0,
     shotAge:0,
     resolving:false,
-    lastOutcome:"",
-    bestStreak:0,
-    totalShots:0,
-    accuracy:0
+    _predictedAimX:null,
   };
 
   let soloNonGoalStreak=0;
 
   function soloResetShot(){
-    solo.player.x=W/2; solo.player.y=H*0.82;
-
     solo.ball.stuck=true;
     solo.ball.vx=solo.ball.vy=0;
     solo.ball.spin=0;
@@ -910,711 +988,578 @@
     solo.keeper._cy = solo.keeper.y + dy;
   }
 
-  function soloFinish(outcome){
-    if(solo.resolving) return;
-    solo.resolving=true;
-    solo.lastOutcome = outcome || "";
-
-    solo.ball.stuck=true;
-    solo.ball.vx=solo.ball.vy=0;
-
-    setTimeout(()=>soloResetShot(), 300);
-  }
-
-  function soloShoot(dx,dy,mag){
-    hideAd();
-    if(!solo.ball.stuck || solo.resolving) return;
-
-    if(mag < 140){
-      toast("👆 محکم‌تر بکش");
-      return;
-    }
-
-    solo.ball.stuck=false;
-    solo.shotAge=0;
-    solo.resolving=false;
-    solo.totalShots++;
-
-    const power = clamp(mag, 140, 650);
-    const base  = power * 0.030;
-
-    const nx=dx/(power||1), ny=dy/(power||1);
-
-    solo.ball.vx = nx * base;
-    solo.ball.vy = ny * base;
-
-    solo.ball.spin = clamp(nx*4.2, -4.5, 4.5);
-
-    const gx1=(W-S.soloGoalW)/2;
-    const mouthY = (S.margin+18) + S.soloGoalH;
-    const t = Math.max(0.02, (solo.ball.y - mouthY) / Math.max(0.001, -solo.ball.vy));
-    solo._predictedAimX = clamp(solo.ball.x + solo.ball.vx*t, gx1+12, gx1+S.soloGoalW-12);
-
-    solo.score += 1;
-    sfxKick(); vibr(12);
-
-    soloCommitDive();
-  }
-
-  function soloMakeParticles(x,y){
-    for(let i=0;i<60;i++){
-      const angle = (Math.random()*Math.PI*2);
-      const speed = 3 + Math.random()*6;
+  function spawnParticles(x,y,color="#22c55e",n=14){
+    for(let i=0;i<n;i++){
       solo.particles.push({
         x,y,
-        vx:Math.cos(angle)*speed,
-        vy:Math.sin(angle)*speed - Math.random()*2,
-        a:1, 
-        life:0.8+Math.random()*1.2,
-        size:2+Math.random()*4,
-        color:`hsl(${120+Math.random()*60}, 100%, ${50+Math.random()*20}%)`
+        vx:(Math.random()*2-1)*3.2,
+        vy:(Math.random()*2-1)*3.2,
+        life:0,
+        max:0.45+Math.random()*0.4,
+        color,
+        size:2+Math.random()*3
       });
     }
   }
 
-  function soloUpdate(dt){
-    timeLeft -= dt;
-    if(timeLeft<=0){
-      timeLeft=0; running=false; paused=true;
-      inEndScreen=true;
-      
-      const acc = solo.totalShots > 0 ? Math.round((solo.goals/solo.totalShots)*100) : 0;
-      openOverlay("پایان بازی ⏱",`🎯 گل‌ها: ${solo.goals} | 📊 دقت: ${acc}% | 🔥 بهترین استریک: ${solo.bestStreak}x`,"end");
-      if(ADS.showOnTimeEnd) showAd();
-      return;
-    }
-
-    soloStepKeeper(dt);
-
+  function updateParticles(dt){
     for(let i=solo.particles.length-1;i>=0;i--){
       const p=solo.particles[i];
-      p.life-=dt;
-      p.x += p.vx*(dt*60);
-      p.y += p.vy*(dt*60);
-      p.vy += 0.22*(dt*60);
-      p.a *= 0.95;
-      if(p.life<=0) solo.particles.splice(i,1);
+      p.life+=dt;
+      p.x+=p.vx*60*dt;
+      p.y+=p.vy*60*dt;
+      p.vx*=0.96;
+      p.vy*=0.96;
+      p.vy+=1.2*dt*60;
+      if(p.life>=p.max) solo.particles.splice(i,1);
     }
+  }
+
+  function drawParticles(){
+    for(const p of solo.particles){
+      const a = 1 - (p.life/p.max);
+      ctx.globalAlpha=a;
+      ctx.fillStyle=p.color;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+
+  // Ball trail for style
+  function updateTrail(){
+    const b=solo.ball;
+    b.trail.unshift({x:b.x,y:b.y,life:0});
+    if(b.trail.length>10) b.trail.pop();
+    for(const t of b.trail) t.life += 1;
+  }
+  function drawTrail(){
+    const b=solo.ball;
+    for(let i=0;i<b.trail.length;i++){
+      const t=b.trail[i];
+      const a = (1 - i/b.trail.length)*0.35;
+      ctx.globalAlpha=a;
+      ctx.fillStyle="rgba(255,255,255,.9)";
+      ctx.beginPath();
+      ctx.arc(t.x,t.y,b.r*(0.7 - i*0.03),0,Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+
+  function soloShoot(dx,dy,mag){
+    if(!solo.ball.stuck || solo.resolving) return;
+    solo.totalShots++;
+    const strength = clamp(mag/110, 0, 1);
+    if(strength<0.14){ hype("👆 محکم‌تر بکش","neutral",650); return; }
+
+    const angle = Math.atan2(dy,dx);
+    // shoot towards opposite direction (drag down -> kick up)
+    const sp = 7 + strength*9;
+
+    solo.ball.stuck=false;
+    solo.ball.vx = -Math.cos(angle)*sp;
+    solo.ball.vy = -Math.sin(angle)*sp;
+
+    // curve/spin based on sideways drag
+    const side = clamp(dx/90, -1, 1);
+    solo.ball.spin = side * (0.55 + strength*0.75);
+
+    // predict aim for keeper
+    solo._predictedAimX = clamp(solo.ball.x + solo.ball.vx*14 + solo.ball.spin*120, 0, W);
+
+    sfxKick(); vibr(18);
+
+    // commit keeper dive after short delay for drama
+    setTimeout(()=>soloCommitDive(), 120 + (Math.random()*50));
+  }
+
+  function soloFinish(outcome){
+    solo.resolving=true;
+    solo.lastOutcome=outcome;
+    setTimeout(()=>{ soloResetShot(); }, 520);
+  }
+
+  function soloUpdate(dt){
+    // place player + ball initial
+    solo.player.x=W/2;
+    solo.player.y=H - S.margin - 52;
+
+    if(solo.ball.stuck){
+      solo.ball.x=solo.player.x;
+      solo.ball.y=solo.player.y-(solo.player.r+solo.ball.r+6);
+      solo._predictedAimX = null;
+    }else{
+      solo.shotAge += dt;
+      // physics
+      solo.ball.vy += 0.06*60*dt; // slight gravity
+      solo.ball.x += solo.ball.vx*60*dt;
+      solo.ball.y += solo.ball.vy*60*dt;
+
+      // curve by spin
+      solo.ball.vx += solo.ball.spin * 0.07*60*dt;
+      solo.ball.spin *= 0.992;
+
+      updateTrail();
+
+      // bounds
+      if(solo.ball.x < solo.ball.r){ solo.ball.x=solo.ball.r; solo.ball.vx*=-0.7; }
+      if(solo.ball.x > W-solo.ball.r){ solo.ball.x=W-solo.ball.r; solo.ball.vx*=-0.7; }
+      if(solo.ball.y < solo.ball.r){ solo.ball.y=solo.ball.r; solo.ball.vy*=-0.7; }
+
+      // check goal/keeper/crossbar
+      const gx1=(W-S.soloGoalW)/2;
+      const gx2=gx1+S.soloGoalW;
+      const gy=S.margin+40; // crossbar y
+      const mouthY = gy + 2; // mouth line
+
+      // post/crossbar collision
+      const postLx = gx1;
+      const postRx = gx2;
+
+      const kx=solo.keeper._cx, ky=solo.keeper._cy;
+      const body={x:kx-solo.keeper.w/2, y:ky-solo.keeper.h/2, w:solo.keeper.w, h:solo.keeper.h};
+      const head={x:kx, y:ky-solo.keeper.h/2-solo.keeper.headR+2, r:solo.keeper.headR};
+
+      const crossbarY = gy;
+      const nearX = (solo.ball.x >= postLx - 8 && solo.ball.x <= postRx + 8);
+      const hitCrossbar = nearX && (Math.abs((solo.ball.y - solo.ball.r) - crossbarY) < 7) && solo.ball.vy < 0;
+
+      const hitLeftPost  = Math.abs((solo.ball.x - solo.ball.r) - postLx) < 7 && (solo.ball.y < mouthY+20);
+      const hitRightPost = Math.abs((solo.ball.x + solo.ball.r) - postRx) < 7 && (solo.ball.y < mouthY+20);
+
+      if(hitCrossbar || hitLeftPost || hitRightPost){
+        sfxPost(); vibr(14); hype("🥶 تیر دروازه!","warn");
+        solo.streak=0;
+        soloNonGoalStreak++;
+        if(soloNonGoalStreak>=2) showAd();
+        if(hitCrossbar) solo.ball.vy = Math.abs(solo.ball.vy) * 0.7;
+        if(hitLeftPost || hitRightPost) solo.ball.vx *= -0.8;
+        soloFinish("post");
+        return;
+      }
+
+      const hitBody = circleRectHit(solo.ball.x,solo.ball.y,solo.ball.r, body.x,body.y,body.w,body.h);
+      const hitHead = dist(solo.ball.x,solo.ball.y, head.x,head.y) <= (solo.ball.r+head.r);
+
+      if(solo.keeper.saveCooldown<=0 && (hitBody || hitHead)){
+        solo.streak=0;
+        soloNonGoalStreak++;
+        sfxSave(); vibr(20); hype("🧤 سیو توسط دروازه‌بان!","warn");
+        if(soloNonGoalStreak>=2) showAd();
+        soloFinish("save");
+        return;
+      }
+
+      const insideMouthX = (solo.ball.x >= gx1+12 && solo.ball.x <= gx2-12);
+      const crossesMouth = (solo.ball.y - solo.ball.r) <= mouthY && solo.ball.vy < 0;
+
+      const g = keeperDifficulty();
+      const gxMid = gx1 + S.soloGoalW/2;
+      const centerHard = Math.abs(solo.ball.x - gxMid) < (S.soloGoalW * g.centerBias);
+
+      const speed = Math.hypot(solo.ball.vx, solo.ball.vy);
+      const strongEnough = speed > 3.8;
+
+      if(crossesMouth){
+        if(!insideMouthX){
+          solo.streak=0;
+          soloNonGoalStreak++;
+          sfxMiss(); vibr(18); hype("😅 اوت شد!","bad");
+          if(soloNonGoalStreak>=2) showAd();
+          soloFinish("miss");
+          return;
+        }
+
+        if(centerHard && !strongEnough){
+          solo.streak=0;
+          soloNonGoalStreak++;
+          sfxMiss(); hype("💨 ضعیف بود!","bad");
+          if(soloNonGoalStreak>=2) showAd();
+          soloFinish("weak");
+          return;
+        }
+
+        if(centerHard && strongEnough && solo.keeper.diveT>0.35){
+          solo.streak=0;
+          soloNonGoalStreak++;
+          sfxSave(); hype("🧤 وسط آسون بود!","warn");
+          if(soloNonGoalStreak>=2) showAd();
+          soloFinish("center");
+          return;
+        }
+
+        // GOAL
+        solo.goals++;
+        solo.streak++;
+        solo.bestStreak=Math.max(solo.bestStreak, solo.streak);
+        soloNonGoalStreak=0;
+
+        // scoring
+        const bonus = 10 + solo.streak*2;
+        const cornerBonus = centerHard ? 0 : 6;
+        solo.score += bonus + cornerBonus;
+
+        // ripple + particles
+        solo.ripple={x:solo.ball.x,y:mouthY+10,age:0};
+        spawnParticles(solo.ball.x, mouthY+10, "#22c55e", 22);
+
+        const hypeText = solo.streak>=4 ? `🔥🔥🔥 گل! (${solo.streak}x)` : `⚽ گل! +${bonus}`;
+        goalHype(hypeText);
+        if(solo.streak>=3) showCombo(`COMBO x${solo.streak}!`);
+
+        soloFinish("goal");
+        return;
+      }
+
+      // time-out shot (ball fell down)
+      if(solo.ball.y > H + 60){
+        solo.streak=0;
+        soloNonGoalStreak++;
+        sfxMiss(); vibr(16); hype("😅 دیر شد!","bad");
+        if(soloNonGoalStreak>=2) showAd();
+        soloFinish("late");
+        return;
+      }
+    }
+
+    // keeper update
+    solo.keeper.saveCooldown = Math.max(0, solo.keeper.saveCooldown - dt);
+    soloStepKeeper(dt);
+
+    // ripple age
     if(solo.ripple){
       solo.ripple.age += dt;
-      if(solo.ripple.age > 0.9) solo.ripple=null;
+      if(solo.ripple.age>0.6) solo.ripple=null;
     }
 
-    if(solo.ball.stuck) return;
+    // particles
+    updateParticles(dt);
 
-    solo.shotAge += dt;
-    if(solo.shotAge > 2.5){
-      solo.streak=0;
-      soloNonGoalStreak++;
-      sfxMiss(); vibr(16); toast("😅 دیر شد!");
-      if(soloNonGoalStreak>=2) showAd();
-      soloFinish("timeout");
-      return;
-    }
-
-    solo.keeper.saveCooldown = Math.max(0, solo.keeper.saveCooldown - dt);
-
-    if(solo.ball.vy < 0){
-      const nearGoal = clamp(1 - (solo.ball.y / (H*0.65)), 0, 1);
-      const curveStrength = 0.058 + nearGoal*0.025;
-      solo.ball.vx += solo.ball.spin * curveStrength * (dt*60);
-      
-      // Add slight turbulence
-      solo.ball.vx += (Math.random()*2-1) * 0.008 * (dt*60);
-      solo.ball.vy += (Math.random()*2-1) * 0.006 * (dt*60);
-    }
-
-    solo.ball.x += solo.ball.vx*(dt*60);
-    solo.ball.y += solo.ball.vy*(dt*60);
-    solo.ball.vx *= 0.993;
-    solo.ball.vy *= 0.993;
-    solo.ball.spin *= 0.991;
-
-    solo.ball.trail.push({x:solo.ball.x,y:solo.ball.y,a:1});
-    if(solo.ball.trail.length>28) solo.ball.trail.shift();
-    for(const t of solo.ball.trail) t.a *= 0.91;
-
-    const gx1=(W-S.soloGoalW)/2;
-    const gy=S.margin+18;
-    const gx2=gx1+S.soloGoalW;
-    const mouthY = gy + S.soloGoalH;
-
-    const postLx = gx1;
-    const postRx = gx2;
-
-    const kx=solo.keeper._cx, ky=solo.keeper._cy;
-    const body={x:kx-solo.keeper.w/2, y:ky-solo.keeper.h/2, w:solo.keeper.w, h:solo.keeper.h};
-    const head={x:kx, y:ky-solo.keeper.h/2-solo.keeper.headR+2, r:solo.keeper.headR};
-
-    const crossbarY = gy;
-    const nearX = (solo.ball.x >= postLx - 8 && solo.ball.x <= postRx + 8);
-    const hitCrossbar = nearX && (Math.abs((solo.ball.y - solo.ball.r) - crossbarY) < 7) && solo.ball.vy < 0;
-
-    const hitLeftPost  = Math.abs((solo.ball.x - solo.ball.r) - postLx) < 7 && (solo.ball.y < mouthY+20);
-    const hitRightPost = Math.abs((solo.ball.x + solo.ball.r) - postRx) < 7 && (solo.ball.y < mouthY+20);
-
-    if(hitCrossbar || hitLeftPost || hitRightPost){
-      sfxPost(); vibr(14); toast("🥶 تیر دروازه!");
-      solo.streak=0;
-      soloNonGoalStreak++;
-      if(soloNonGoalStreak>=2) showAd();
-      if(hitCrossbar) solo.ball.vy = Math.abs(solo.ball.vy) * 0.7;
-      if(hitLeftPost || hitRightPost) solo.ball.vx *= -0.8;
-      soloFinish("post");
-      return;
-    }
-
-    const hitBody = circleRectHit(solo.ball.x,solo.ball.y,solo.ball.r, body.x,body.y,body.w,body.h);
-    const hitHead = dist(solo.ball.x,solo.ball.y, head.x,head.y) <= (solo.ball.r+head.r);
-
-    if(solo.keeper.saveCooldown<=0 && (hitBody || hitHead)){
-      solo.streak=0;
-      soloNonGoalStreak++;
-      sfxSave(); vibr(20); toast("🧤 سیو توسط دروازه‌بان!");
-      if(soloNonGoalStreak>=2) showAd();
-      soloFinish("save");
-      return;
-    }
-
-    const insideMouthX = (solo.ball.x >= gx1+12 && solo.ball.x <= gx2-12);
-    const crossesMouth = (solo.ball.y - solo.ball.r) <= mouthY && solo.ball.vy < 0;
-
-    const g = keeperDifficulty();
-    const gxMid = gx1 + S.soloGoalW/2;
-    const centerHard = Math.abs(solo.ball.x - gxMid) < (S.soloGoalW * g.centerBias);
-
-    const speed = Math.hypot(solo.ball.vx, solo.ball.vy);
-    const strongEnough = speed > 3.8;
-
-    if(crossesMouth && insideMouthX){
-      if(!strongEnough){
-        solo.streak=0; soloNonGoalStreak++;
-        sfxMiss(); toast("💨 ضعیف بود!");
-        if(soloNonGoalStreak>=2) showAd();
-        soloFinish("weak"); return;
-      }
-      if(centerHard){
-        solo.streak=0; soloNonGoalStreak++;
-        sfxSave(); toast("🧤 وسط آسون بود!");
-        if(soloNonGoalStreak>=2) showAd();
-        soloFinish("centerSaved"); return;
-      }
-
-      solo.goals++;
-      solo.streak++;
-      if(solo.streak > solo.bestStreak) solo.bestStreak = solo.streak;
-      soloNonGoalStreak=0;
-
-      const baseScore = 15;
-      const streakBonus = Math.min(30, solo.streak*3);
-      const cornerBonus = Math.abs(solo.ball.x - gxMid) > (S.soloGoalW*0.35) ? 10 : 0;
-      solo.score += baseScore + streakBonus + cornerBonus;
-
-      solo.ripple = {x:solo.ball.x, y:mouthY+10, age:0};
-      soloMakeParticles(solo.ball.x, mouthY+12);
-
-      ui.p1Pill.classList.add('pulse');
-      setTimeout(()=>ui.p1Pill.classList.remove('pulse'), 500);
-
-      if(solo.goals>0 && solo.goals%3===0) showAd();
-
-      let goalText = "گلللل! ⚽🔥";
-      if(solo.streak>=10) goalText = "🌟 خدایی! ⚽👑";
-      else if(solo.streak>=7) goalText = "🔥 افسانه‌ای! ⚽🚀";
-      else if(solo.streak>=5) goalText = "⭐ فوق‌العاده! ⚽💫";
-      else if(solo.streak>=3) goalText = "سوپر گل! ⚽⭐";
-      
-      if(solo.streak>=3) showCombo(`${solo.streak}x COMBO! 🔥`);
-      
-      goalHype(goalText);
-      soloFinish("goal");
-      return;
-    }
-
-    const minX=S.margin+solo.ball.r, maxX=W-S.margin-solo.ball.r;
-    const minY=S.margin+solo.ball.r, maxY=H-S.margin-solo.ball.r;
-
-    if(solo.ball.x<minX){ solo.ball.x=minX; solo.ball.vx*=-0.87; solo.ball.spin*=-0.65; }
-    if(solo.ball.x>maxX){ solo.ball.x=maxX; solo.ball.vx*=-0.87; solo.ball.spin*=-0.65; }
-    if(solo.ball.y<minY){ solo.ball.y=minY; solo.ball.vy*=-0.87; }
-
-    if(solo.ball.y>maxY){
-      solo.streak=0;
-      soloNonGoalStreak++;
-      sfxMiss(); vibr(18); toast("😅 اوت شد!");
-      if(soloNonGoalStreak>=2) showAd();
-      soloFinish("out");
-    }
+    // accuracy
+    if(solo.totalShots>0) solo.accuracy = Math.round((solo.goals/solo.totalShots)*100);
   }
 
   function soloDraw(drag){
     drawField();
 
+    // goal
     const gx1=(W-S.soloGoalW)/2;
-    const gy=S.margin+18;
+    const gy=S.margin+40;
+    drawGoalFrame({
+      x:gx1, y:gy, w:S.soloGoalW, h:S.soloGoalH,
+      depth:S.soloGoalDepth, flip:false,
+      ripple:solo.ripple,
+      glow:"rgba(34,197,94,.28)"
+    });
 
-    drawGoalFrame({x:gx1,y:gy,w:S.soloGoalW,h:S.soloGoalH,depth:S.soloGoalDepth,flip:false,ripple:solo.ripple});
-
-    // Penalty box
-    ctx.globalAlpha=0.6;
-    ctx.strokeStyle="rgba(255,255,255,.45)";
-    ctx.lineWidth=2.5;
-    ctx.strokeRect(W/2 - S.soloGoalW*0.85, S.margin+8, S.soloGoalW*1.7, 150);
-    ctx.globalAlpha=1;
-
-    // Enhanced goalkeeper with animation
-    const x=solo.keeper._cx, y=solo.keeper._cy;
-
-    // Shadow
-    ctx.globalAlpha=0.28; 
-    ctx.fillStyle="#000";
-    ctx.beginPath(); 
-    ctx.ellipse(x, y+28, 42, 12, 0, 0, Math.PI*2); 
+    // keeper
+    const k=solo.keeper;
+    ctx.save();
+    ctx.translate(k._cx, k._cy);
+    ctx.fillStyle="rgba(255,255,255,.92)";
+    rr(-k.w/2, -k.h/2, k.w, k.h, 8);
     ctx.fill();
-    ctx.globalAlpha=1;
-
-    // Body with better gradient
-    const bodyG=ctx.createLinearGradient(x-70,y-30,x+70,y+30);
-    bodyG.addColorStop(0,"rgba(59,130,246,.98)");
-    bodyG.addColorStop(0.5,"rgba(96,165,250,.92)");
-    bodyG.addColorStop(1,"rgba(147,197,253,.75)");
-    ctx.fillStyle=bodyG;
-    rr(x-solo.keeper.w/2, y-solo.keeper.h/2, solo.keeper.w, solo.keeper.h, 14);
+    ctx.fillStyle="rgba(15,23,42,.75)";
+    rr(-k.w/2+8, -k.h/2+4, k.w-16, k.h-8, 7);
     ctx.fill();
+    // head
+    ctx.fillStyle="rgba(255,255,255,.95)";
+    ctx.beginPath(); ctx.arc(0, -k.h/2-k.headR+2, k.headR, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
 
-    // Body highlight
-    ctx.globalAlpha=0.25;
-    ctx.fillStyle="#fff";
-    rr(x-solo.keeper.w/2+5, y-solo.keeper.h/2+3, solo.keeper.w*0.4, solo.keeper.h*0.6, 10);
-    ctx.fill();
-    ctx.globalAlpha=1;
+    // player base
+    ctx.save();
+    ctx.translate(solo.player.x, solo.player.y);
+    ctx.fillStyle="rgba(59,130,246,.16)";
+    ctx.beginPath(); ctx.arc(0,0,solo.player.r+8,0,Math.PI*2); ctx.fill();
+    ctx.restore();
 
-    // Enhanced head
-    const skin=ctx.createRadialGradient(x-5,y-14,2,x,y-10,18);
-    skin.addColorStop(0,"rgba(255,230,200,.98)");
-    skin.addColorStop(0.6,"rgba(240,200,165,.96)");
-    skin.addColorStop(1,"rgba(220,180,140,.94)");
-    ctx.fillStyle=skin;
-    ctx.beginPath(); 
-    ctx.arc(x, y-solo.keeper.h/2-solo.keeper.headR+2, solo.keeper.headR, 0, Math.PI*2); 
-    ctx.fill();
+    // trail + ball
+    if(!solo.ball.stuck) drawTrail();
+    drawSoccerBall(solo.ball.x,solo.ball.y,solo.ball.r,solo.ball.spin);
 
-    // Face details
-    ctx.fillStyle="rgba(0,0,0,.7)";
-    ctx.beginPath(); 
-    ctx.arc(x-4, y-solo.keeper.h/2-solo.keeper.headR+1, 1.5, 0, Math.PI*2); 
-    ctx.fill();
-    ctx.beginPath(); 
-    ctx.arc(x+4, y-solo.keeper.h/2-solo.keeper.headR+1, 1.5, 0, Math.PI*2); 
-    ctx.fill();
+    // aiming/power UI
+    if(drag && drag.active && drag.start && drag.now){
+      const dx=drag.start.x-drag.now.x;
+      const dy=drag.start.y-drag.now.y;
+      const mag=Math.hypot(dx,dy);
+      const p=clamp(mag/110,0,1);
+      ui.powerMeter.classList.add('show');
+      ui.powerBar.style.width = `${Math.round(p*100)}%`;
 
-    // Arms with gloves
-    ctx.strokeStyle="rgba(226,232,240,.96)";
-    ctx.lineWidth=7; 
-    ctx.lineCap="round";
-    const arm=solo.keeper.diveT*22;
-    const armBend = Math.sin(solo.keeper.diveT*Math.PI)*8;
-    ctx.beginPath();
-    ctx.moveTo(x-solo.keeper.w*0.20, y);
-    ctx.lineTo(x-solo.keeper.w*0.55-arm, y-2-armBend);
-    ctx.moveTo(x+solo.keeper.w*0.20, y);
-    ctx.lineTo(x+solo.keeper.w*0.55-arm, y-2-armBend);
-    ctx.stroke();
-
-    // Gloves with glow
-    ctx.shadowColor="rgba(255,255,255,.4)";
-    ctx.shadowBlur=8;
-    ctx.fillStyle="rgba(255,255,255,.98)";
-    ctx.beginPath(); 
-    ctx.arc(x-solo.keeper.w*0.60-arm, y-2-armBend, 9, 0, Math.PI*2); 
-    ctx.fill();
-    ctx.beginPath(); 
-    ctx.arc(x+solo.keeper.w*0.60-arm, y-2-armBend, 9, 0, Math.PI*2); 
-    ctx.fill();
-    ctx.shadowBlur=0;
-
-    // Enhanced particles
-    for(const p of solo.particles){
-      ctx.globalAlpha=Math.max(0,p.a)*0.95;
-      ctx.fillStyle=p.color || "rgba(255,255,255,.95)";
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size||3, 0, Math.PI*2);
-      ctx.fill();
-    }
-    ctx.globalAlpha=1;
-
-    // Enhanced ball trail
-    for(let i=0; i<solo.ball.trail.length; i++){
-      const t = solo.ball.trail[i];
-      const alpha = (t.a||0.4)*0.6;
-      const size = solo.ball.r + 10 - (i*0.3);
-      ctx.globalAlpha=alpha;
-      const trailGrad = ctx.createRadialGradient(t.x,t.y,0,t.x,t.y,size);
-      trailGrad.addColorStop(0,"rgba(34,197,94,.3)");
-      trailGrad.addColorStop(1,"transparent");
-      ctx.fillStyle=trailGrad;
-      ctx.beginPath(); 
-      ctx.arc(t.x,t.y, size, 0, Math.PI*2);
-      ctx.fill();
-    }
-    ctx.globalAlpha=1;
-
-    drawSoccerBall(solo.ball.x, solo.ball.y, solo.ball.r, solo.ball.spin);
-
-    if(drag.active){
-      const dx = drag.start.x - drag.now.x;
-      const dy = drag.start.y - drag.now.y;
-      const mag = Math.hypot(dx,dy);
-      const pwr = clamp(mag, 0, 650);
-
-      // Enhanced power indicator with glow
-      ctx.globalAlpha=0.9;
-      const powerColor = pwr>500 ? "rgba(239,68,68,.95)" : pwr>350 ? "rgba(249,115,22,.95)" : "rgba(163,230,53,.95)";
-      ctx.strokeStyle = powerColor;
-      ctx.lineWidth=5;
-      ctx.shadowColor=powerColor;
-      ctx.shadowBlur=12;
-      ctx.beginPath();
-      ctx.arc(solo.ball.x, solo.ball.y, 20 + pwr*0.032, 0, Math.PI*2);
-      ctx.stroke();
-      
-      // Inner ring
+      // arrow
+      const ax=solo.ball.x, ay=solo.ball.y;
+      const ang=Math.atan2(dy,dx);
+      const len=40+p*45;
+      ctx.save();
+      ctx.translate(ax,ay);
+      ctx.rotate(ang+Math.PI); // show direction of kick (opposite drag)
+      ctx.globalAlpha=0.92;
+      ctx.strokeStyle="rgba(255,255,255,.95)";
       ctx.lineWidth=3;
-      ctx.globalAlpha=0.6;
       ctx.beginPath();
-      ctx.arc(solo.ball.x, solo.ball.y, 16 + pwr*0.025, 0, Math.PI*2);
+      ctx.moveTo(0,0); ctx.lineTo(len,0);
       ctx.stroke();
-      ctx.shadowBlur=0;
-      ctx.globalAlpha=1;
+      ctx.beginPath();
+      ctx.moveTo(len,0); ctx.lineTo(len-12,6);
+      ctx.lineTo(len-12,-6); ctx.closePath();
+      ctx.fillStyle="rgba(255,255,255,.95)";
+      ctx.fill();
+      ctx.restore();
 
-      // Enhanced trajectory line with gradient
-      const trajGrad = ctx.createLinearGradient(solo.ball.x, solo.ball.y, drag.now.x, drag.now.y);
-      trajGrad.addColorStop(0, "rgba(255,255,255,.95)");
-      trajGrad.addColorStop(1, "rgba(255,255,255,.3)");
-      ctx.strokeStyle=trajGrad;
-      ctx.lineWidth=3;
-      ctx.setLineDash([8,8]);
-      ctx.lineCap="round";
-      ctx.shadowColor="rgba(255,255,255,.5)";
-      ctx.shadowBlur=8;
-      ctx.beginPath();
-      ctx.moveTo(solo.ball.x, solo.ball.y);
-      ctx.lineTo(drag.now.x, drag.now.y);
-      ctx.stroke();
-      ctx.shadowBlur=0;
-      ctx.setLineDash([]);
+      // curve hint
+      const side=clamp(dx/90,-1,1);
+      if(Math.abs(side)>0.35){
+        ctx.save();
+        ctx.globalAlpha=0.55;
+        ctx.strokeStyle= side>0 ? "rgba(34,197,94,.95)" : "rgba(59,130,246,.95)";
+        ctx.lineWidth=3;
+        ctx.beginPath();
+        ctx.arc(ax, ay-10, 26, side>0?0.2*Math.PI:0.8*Math.PI, side>0?1.15*Math.PI:1.8*Math.PI, side<0);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }else{
+      ui.powerMeter.classList.remove('show');
+      ui.powerBar.style.width = '0%';
     }
+
+    // particles
+    drawParticles();
   }
 
-  // ==================== PVP (Enhanced two-player) ====================
+  // -------------------- PvP (Two players) --------------------
   const pvp = {
-    ball:{x:0,y:0,r:12,vx:0,vy:0,spin:0,trail:[]},
-    p1:{x:0,y:0,r:20},
-    p2:{x:0,y:0,r:20},
-    s1:0,s2:0,
-    maxGoals:7,
-    ended:false,
-    particles:[]
+    s1:0,s2:0,maxGoals:4,
+    ball:{x:0,y:0,r:10,vx:0,vy:0,spin:0,trail:[]},
+    p1:{x:0,y:0,r:18, color:"rgba(34,197,94,.95)"},
+    p2:{x:0,y:0,r:18, color:"rgba(59,130,246,.95)"},
+    ripple:null,
+    particles:[],
+    lastTouch:null,
+    touchCooldown:0,
   };
 
-  let pvpGoalCount=0;
-
-  function pvpResetField(){
-    pvp.ball.x=W/2; pvp.ball.y=H/2;
-    pvp.ball.vx=0; pvp.ball.vy=0; pvp.ball.spin=0; pvp.ball.trail.length=0;
-    pvp.p1.x=W/2; pvp.p1.y=H*0.78;
-    pvp.p2.x=W/2; pvp.p2.y=H*0.22;
-    pvp.particles.length=0;
-  }
-
   function pvpResetAll(){
-    pvp.s1=0; pvp.s2=0; pvp.ended=false;
-    pvpGoalCount=0;
-    pvpResetField();
+    pvp.s1=0; pvp.s2=0;
+    pvp.ball.x=W/2; pvp.ball.y=H/2;
+    pvp.ball.vx=pvp.ball.vy=0;
+    pvp.ball.spin=0;
+    pvp.ball.trail.length=0;
+    pvp.p1.x=W/2; pvp.p1.y=H-80;
+    pvp.p2.x=W/2; pvp.p2.y=80;
+    pvp.ripple=null;
+    pvp.particles.length=0;
+    pvp.lastTouch=null;
+    pvp.touchCooldown=0;
   }
 
-  function pvpKick(player, impulse){
-    const d=dist(pvp.ball.x,pvp.ball.y,player.x,player.y);
-    const minD=pvp.ball.r+player.r;
-    if(d<minD){
-      const nx=(pvp.ball.x-player.x)/(d||1);
-      const ny=(pvp.ball.y-player.y)/(d||1);
-      const overlap=(minD-d)+0.8;
-      pvp.ball.x+=nx*overlap; pvp.ball.y+=ny*overlap;
-
-      pvp.ball.vx += nx*impulse;
-      pvp.ball.vy += ny*impulse;
-
-      pvp.ball.spin += nx*0.6;
-
-      // Kick particles
-      for(let i=0;i<15;i++){
-        const angle = Math.atan2(ny,nx) + (Math.random()*0.8-0.4);
-        pvp.particles.push({
-          x:pvp.ball.x,y:pvp.ball.y,
-          vx:-Math.cos(angle)*(2+Math.random()*3),
-          vy:-Math.sin(angle)*(2+Math.random()*3),
-          a:1, life:0.5+Math.random()*0.5,
-          size:2+Math.random()*3
-        });
-      }
-
-      sfxKick(); vibr(10);
-      hideAd();
+  function pvpSpawnParticles(x,y,color="#22c55e",n=12){
+    for(let i=0;i<n;i++){
+      pvp.particles.push({
+        x,y,
+        vx:(Math.random()*2-1)*3.2,
+        vy:(Math.random()*2-1)*3.2,
+        life:0,
+        max:0.45+Math.random()*0.4,
+        color,
+        size:2+Math.random()*3
+      });
     }
   }
-
-  function pvpGoal(whose){
-    if(pvp.ended) return;
-    if(whose===1) {
-      pvp.s1++; 
-      ui.p1Pill.classList.add('pulse');
-      setTimeout(()=>ui.p1Pill.classList.remove('pulse'), 500);
+  function pvpUpdateParticles(dt){
+    for(let i=pvp.particles.length-1;i>=0;i--){
+      const p=pvp.particles[i];
+      p.life+=dt;
+      p.x+=p.vx*60*dt;
+      p.y+=p.vy*60*dt;
+      p.vx*=0.96; p.vy*=0.96;
+      if(p.life>=p.max) pvp.particles.splice(i,1);
     }
-    else {
-      pvp.s2++;
-      ui.p2Pill.classList.add('pulse');
-      setTimeout(()=>ui.p2Pill.classList.remove('pulse'), 500);
+  }
+  function pvpDrawParticles(){
+    for(const p of pvp.particles){
+      const a = 1 - (p.life/p.max);
+      ctx.globalAlpha=a;
+      ctx.fillStyle=p.color;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill();
     }
-
-    pvpGoalCount++;
-    if(pvpGoalCount%2===0) showAd();
-
-    goalHype(whose===1 ? "گل برای بازیکن ۱ 🟢⚽" : "گل برای بازیکن ۲ 🔵⚽");
-
-    if(pvp.s1>=pvp.maxGoals || pvp.s2>=pvp.maxGoals){
-      pvp.ended=true;
-      running=false; paused=true; inEndScreen=true;
-
-      const winner = (pvp.s1>pvp.s2) ? "بازیکن ۱ 🟢" : "بازیکن ۲ 🔵";
-      openOverlay("پایان بازی 🎉", `${winner} برنده شد! 🏆 (${pvp.s1} - ${pvp.s2})`, "end");
-      if(ADS.showOnWin) showAd();
-      return;
-    }
-
-    pvpResetField();
+    ctx.globalAlpha=1;
   }
 
   function pvpUpdate(dt){
-    timeLeft -= dt;
-    if(timeLeft<=0){
-      timeLeft=0; running=false; paused=true; inEndScreen=true;
-      let title="پایان بازی ⏱";
-      let msg;
-      if(pvp.s1===pvp.s2) msg=`مساوی! 🤝 (${pvp.s1} - ${pvp.s2})`;
-      else msg=`برنده: ${(pvp.s1>pvp.s2)?"بازیکن ۱ 🟢":"بازیکن ۲ 🔵"} 🏆 (${pvp.s1} - ${pvp.s2})`;
-      openOverlay(title, msg, "end");
-      if(ADS.showOnTimeEnd) showAd();
-      return;
-    }
+    // field positions
+    pvp.p1.y = H - S.margin - 56;
+    pvp.p2.y = S.margin + 56;
 
-    // Update particles
-    for(let i=pvp.particles.length-1;i>=0;i--){
-      const p=pvp.particles[i];
-      p.life-=dt;
-      p.x += p.vx*(dt*60);
-      p.y += p.vy*(dt*60);
-      p.vy += 0.18*(dt*60);
-      p.a *= 0.94;
-      if(p.life<=0) pvp.particles.splice(i,1);
-    }
+    // ball physics
+    pvp.ball.vy += 0.03*60*dt;
+    pvp.ball.x += pvp.ball.vx*60*dt;
+    pvp.ball.y += pvp.ball.vy*60*dt;
+    pvp.ball.vx += pvp.ball.spin * 0.04*60*dt;
+    pvp.ball.spin *= 0.994;
 
-    pvpKick(pvp.p1, 7.5);
-    pvpKick(pvp.p2, 7.5);
+    // bounds
+    if(pvp.ball.x < pvp.ball.r){ pvp.ball.x=pvp.ball.r; pvp.ball.vx*=-0.85; }
+    if(pvp.ball.x > W-pvp.ball.r){ pvp.ball.x=W-pvp.ball.r; pvp.ball.vx*=-0.85; }
 
-    pvp.ball.x += pvp.ball.vx*(dt*60);
-    pvp.ball.y += pvp.ball.vy*(dt*60);
-
-    pvp.ball.vx += pvp.ball.spin * 0.012 * (dt*60);
-    pvp.ball.spin *= 0.99;
-
-    pvp.ball.vx *= 0.985;
-    pvp.ball.vy *= 0.985;
-
-    pvp.ball.trail.push({x:pvp.ball.x,y:pvp.ball.y,a:1});
-    if(pvp.ball.trail.length>26) pvp.ball.trail.shift();
-    for(const t of pvp.ball.trail) t.a*=0.90;
-
-    const gx1=(W-S.pvpGoalW)/2;
-    const gx2=gx1+S.pvpGoalW;
-
-    const topMouth = S.margin + S.pvpGoalH;
-    const botMouth = H - S.margin - S.pvpGoalH;
-
-    if(pvp.ball.x>gx1+8 && pvp.ball.x<gx2-8){
-      if(pvp.ball.y - pvp.ball.r <= topMouth && pvp.ball.vy < 0){
-        pvpGoal(1); return;
+    // player collisions (simple kick)
+    pvp.touchCooldown = Math.max(0, pvp.touchCooldown-dt);
+    function collidePlayer(pl, id){
+      if(pvp.touchCooldown>0) return false;
+      const d = dist(pvp.ball.x,pvp.ball.y, pl.x,pl.y);
+      if(d <= pl.r + pvp.ball.r + 4){
+        const ang = Math.atan2(pvp.ball.y-pl.y, pvp.ball.x-pl.x);
+        const sp = 6.5;
+        pvp.ball.vx = Math.cos(ang)*sp;
+        pvp.ball.vy = Math.sin(ang)*sp;
+        pvp.ball.spin += (Math.random()*2-1)*0.22;
+        pvp.lastTouch=id;
+        pvp.touchCooldown=0.08;
+        sfxKick(); vibr(12);
+        pvpSpawnParticles(pvp.ball.x,pvp.ball.y, id===1 ? "#22c55e" : "#3b82f6", 10);
+        return true;
       }
-      if(pvp.ball.y + pvp.ball.r >= botMouth && pvp.ball.vy > 0){
-        pvpGoal(2); return;
+      return false;
+    }
+    collidePlayer(pvp.p1,1);
+    collidePlayer(pvp.p2,2);
+
+    // goals
+    const g1x=(W-S.pvpGoalW)/2;
+    const g2x=g1x+S.pvpGoalW;
+
+    const topGoalY = S.margin+26;
+    const botGoalY = H - S.margin - 26;
+
+    // top goal (player1 scores)
+    if(pvp.ball.y - pvp.ball.r <= topGoalY && pvp.ball.vy<0){
+      if(pvp.ball.x>=g1x+10 && pvp.ball.x<=g2x-10){
+        pvp.s1++;
+        goalHype("🟢 گل برای بازیکن ۱!");
+        if(ADS.showOnGoal) showAd();
+        pvpResetBall();
+        return;
+      }else{
+        sfxPost(); vibr(10); hype("🥶 تیرک!","warn");
+        pvp.ball.vy*=-0.7;
       }
     }
 
-    const minX=S.margin+pvp.ball.r, maxX=W-S.margin-pvp.ball.r;
-    const minY=S.margin+pvp.ball.r, maxY=H-S.margin-pvp.ball.r;
+    // bottom goal (player2 scores)
+    if(pvp.ball.y + pvp.ball.r >= botGoalY && pvp.ball.vy>0){
+      if(pvp.ball.x>=g1x+10 && pvp.ball.x<=g2x-10){
+        pvp.s2++;
+        goalHype("🔵 گل برای بازیکن ۲!");
+        if(ADS.showOnGoal) showAd();
+        pvpResetBall();
+        return;
+      }else{
+        sfxPost(); vibr(10); hype("🥶 تیرک!","warn");
+        pvp.ball.vy*=-0.7;
+      }
+    }
 
-    if(pvp.ball.x<minX){ pvp.ball.x=minX; pvp.ball.vx*=-0.90; pvp.ball.spin*=-0.65; }
-    if(pvp.ball.x>maxX){ pvp.ball.x=maxX; pvp.ball.vx*=-0.90; pvp.ball.spin*=-0.65; }
+    // win
+    if(pvp.s1>=pvp.maxGoals || pvp.s2>=pvp.maxGoals){
+      running=false; paused=true; inEndScreen=true;
+      const win = pvp.s1>pvp.s2 ? "🟢 بازیکن ۱ برنده شد!" : "🔵 بازیکن ۲ برنده شد!";
+      openOverlay("پایان بازی 🏁", win, "end");
+      if(ADS.showOnWin) showAd();
+    }
 
-    const inGoalX = (pvp.ball.x>=gx1 && pvp.ball.x<=gx2);
-    if(pvp.ball.y<minY && !inGoalX){ pvp.ball.y=minY; pvp.ball.vy*=-0.90; }
-    if(pvp.ball.y>maxY && !inGoalX){ pvp.ball.y=maxY; pvp.ball.vy*=-0.90; }
+    // particle update
+    pvpUpdateParticles(dt);
+
+    // ball out
+    if(pvp.ball.y > H + 80 || pvp.ball.y < -80){
+      pvpResetBall();
+    }
+  }
+
+  function pvpResetBall(){
+    pvp.ball.x=W/2; pvp.ball.y=H/2;
+    pvp.ball.vx=(Math.random()*2-1)*1.5;
+    pvp.ball.vy=(Math.random()*2-1)*1.5;
+    pvp.ball.spin=0;
+    pvp.ball.trail.length=0;
   }
 
   function pvpDraw(){
     drawField();
 
-    // Enhanced center line
-    ctx.globalAlpha=0.6;
-    ctx.beginPath(); 
-    ctx.moveTo(18,H/2); 
-    ctx.lineTo(W-18,H/2);
-    ctx.strokeStyle="rgba(255,255,255,.75)";
-    ctx.lineWidth=2.5; 
-    ctx.shadowColor="rgba(255,255,255,.3)";
-    ctx.shadowBlur=6;
-    ctx.stroke();
-    ctx.shadowBlur=0;
-    ctx.globalAlpha=1;
-
+    // goals
     const gx1=(W-S.pvpGoalW)/2;
+    const topY = S.margin+26;
+    const botY = H - S.margin - 26 - S.pvpGoalH;
 
-    drawGoalFrame({x:gx1,y:S.margin,w:S.pvpGoalW,h:S.pvpGoalH,depth:S.pvpGoalDepth,flip:true,glow:"rgba(59,130,246,.3)"});
-    drawGoalFrame({x:gx1,y:H-S.margin-S.pvpGoalH,w:S.pvpGoalW,h:S.pvpGoalH,depth:S.pvpGoalDepth,flip:false,glow:"rgba(34,197,94,.3)"});
+    drawGoalFrame({x:gx1,y:topY,w:S.pvpGoalW,h:S.pvpGoalH,depth:S.pvpGoalDepth,flip:true,glow:"rgba(255,255,255,.22)"});
+    drawGoalFrame({x:gx1,y:botY,w:S.pvpGoalW,h:S.pvpGoalH,depth:S.pvpGoalDepth,flip:false,glow:"rgba(255,255,255,.22)"});
 
-    // Particles
-    for(const p of pvp.particles){
-      ctx.globalAlpha=Math.max(0,p.a)*0.9;
-      ctx.fillStyle="rgba(255,255,255,.95)";
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size||3, 0, Math.PI*2);
-      ctx.fill();
-    }
-    ctx.globalAlpha=1;
-
-    // Enhanced ball trail
-    for(let i=0; i<pvp.ball.trail.length; i++){
-      const t = pvp.ball.trail[i];
-      const alpha = (t.a||0.4)*0.6;
-      const size = pvp.ball.r + 9 - (i*0.3);
-      ctx.globalAlpha=alpha;
-      const trailGrad = ctx.createRadialGradient(t.x,t.y,0,t.x,t.y,size);
-      trailGrad.addColorStop(0,"rgba(59,130,246,.3)");
-      trailGrad.addColorStop(1,"transparent");
-      ctx.fillStyle=trailGrad;
-      ctx.beginPath(); 
-      ctx.arc(t.x,t.y, size, 0, Math.PI*2);
-      ctx.fill();
-    }
-    ctx.globalAlpha=1;
-
-    drawSoccerBall(pvp.ball.x,pvp.ball.y,pvp.ball.r,pvp.ball.spin);
-
-    function drawPlayer(pl, fill, label, glow){
+    // players
+    function drawPlayer(pl){
       ctx.save();
-      
-      // Enhanced shadow
-      ctx.globalAlpha=0.25;
-      ctx.fillStyle="#000";
-      ctx.beginPath(); 
-      ctx.ellipse(pl.x,pl.y+pl.r+5,pl.r*0.85,pl.r*0.35,0,0,Math.PI*2); 
-      ctx.fill();
+      ctx.translate(pl.x,pl.y);
+      ctx.fillStyle=pl.color;
+      ctx.globalAlpha=0.22;
+      ctx.beginPath(); ctx.arc(0,0,pl.r+10,0,Math.PI*2); ctx.fill();
       ctx.globalAlpha=1;
-      
-      // Glow effect
-      ctx.shadowColor=glow;
-      ctx.shadowBlur=15;
-      ctx.fillStyle=fill;
-      ctx.beginPath(); 
-      ctx.arc(pl.x,pl.y,pl.r,0,Math.PI*2); 
-      ctx.fill();
-      ctx.shadowBlur=0;
-
-      // Highlight
-      ctx.globalAlpha=0.25;
-      ctx.fillStyle="#fff";
-      ctx.beginPath(); 
-      ctx.arc(pl.x-7,pl.y-7,pl.r*0.6,0,Math.PI*2); 
-      ctx.fill();
-      ctx.globalAlpha=1;
-
-      // Number badge
-      ctx.fillStyle="rgba(0,0,0,.5)";
-      ctx.beginPath(); 
-      ctx.arc(pl.x,pl.y,pl.r*0.6,0,Math.PI*2); 
-      ctx.fill();
-      
-      ctx.fillStyle="rgba(255,255,255,.98)";
-      ctx.font="900 14px system-ui";
-      ctx.textAlign="center"; 
-      ctx.textBaseline="middle";
-      ctx.shadowColor="rgba(0,0,0,.4)";
-      ctx.shadowBlur=4;
-      ctx.fillText(label, pl.x, pl.y+1);
-      ctx.shadowBlur=0;
-
+      ctx.fillStyle="rgba(255,255,255,.92)";
+      ctx.beginPath(); ctx.arc(0,0,pl.r,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle="rgba(15,23,42,.75)";
+      ctx.beginPath(); ctx.arc(0,0,pl.r-6,0,Math.PI*2); ctx.fill();
       ctx.restore();
     }
+    drawPlayer(pvp.p1);
+    drawPlayer(pvp.p2);
 
-    drawPlayer(pvp.p1,"rgba(34,197,94,.95)","1","rgba(34,197,94,.6)");
-    drawPlayer(pvp.p2,"rgba(59,130,246,.95)","2","rgba(59,130,246,.6)");
+    // ball
+    drawSoccerBall(pvp.ball.x,pvp.ball.y,pvp.ball.r,pvp.ball.spin);
+
+    // particles
+    pvpDrawParticles();
   }
 
   // ==================== Input ====================
-  const drag={active:false,start:null,now:null};
   const pointers=new Map();
+  let drag={active:false,start:null,now:null};
+  const TOUCH_ROLE = {p1:false,p2:false};
 
   cv.addEventListener("pointerdown",(e)=>{
-    if(!running || paused) return;
     cv.setPointerCapture(e.pointerId);
-    const p=toLocal(e);
-
+    pointers.set(e.pointerId, {x:e.clientX,y:e.clientY});
     if(mode===MODES.solo){
-      if(dist(p.x,p.y,solo.ball.x,solo.ball.y) <= solo.ball.r+38){
-        drag.active=true; drag.start={...p}; drag.now={...p};
-        ui.powerMeter.classList.add('show');
+      const p=toLocal(e);
+      const d=dist(p.x,p.y, solo.ball.x,solo.ball.y);
+      if(d<=solo.ball.r+18 && solo.ball.stuck){
+        drag.active=true;
+        drag.start=p;
+        drag.now=p;
       }
       return;
     }
 
-    if(p.y > H/2){
-      pointers.set(e.pointerId,{who:"p1"});
-      pvp.p1.x=clamp(p.x, S.margin+pvp.p1.r, W-S.margin-pvp.p1.r);
-      pvp.p1.y=clamp(p.y, H/2+pvp.p1.r, H-S.margin-pvp.p1.r);
-    }else{
-      pointers.set(e.pointerId,{who:"p2"});
-      pvp.p2.x=clamp(p.x, S.margin+pvp.p2.r, W-S.margin-pvp.p2.r);
-      pvp.p2.y=clamp(p.y, S.margin+pvp.p2.r, H/2-pvp.p2.r);
-    }
+    // pvp decide which player based on y
+    const p=toLocal(e);
+    if(p.y>H/2) { TOUCH_ROLE.p1=true; TOUCH_ROLE.p2=false; }
+    else { TOUCH_ROLE.p2=true; TOUCH_ROLE.p1=false; }
   });
 
   cv.addEventListener("pointermove",(e)=>{
-    if(!running || paused) return;
-    const p=toLocal(e);
-
+    if(!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, {x:e.clientX,y:e.clientY});
     if(mode===MODES.solo){
       if(!drag.active) return;
-      drag.now={...p};
-      
-      const dx = drag.start.x - drag.now.x;
-      const dy = drag.start.y - drag.now.y;
-      const mag = Math.hypot(dx,dy);
-      const pwr = clamp(mag, 0, 650);
-      const percent = clamp((pwr/650)*100, 0, 100);
-      ui.powerBar.style.width = percent + '%';
-      
+      drag.now=toLocal(e);
       return;
     }
-
-    const info=pointers.get(e.pointerId);
-    if(!info) return;
-
-    if(info.who==="p1"){
-      pvp.p1.x=clamp(p.x, S.margin+pvp.p1.r, W-S.margin-pvp.p1.r);
-      pvp.p1.y=clamp(p.y, H/2+pvp.p1.r, H-S.margin-pvp.p1.r);
-    }else{
-      pvp.p2.x=clamp(p.x, S.margin+pvp.p2.r, W-S.margin-pvp.p2.r);
-      pvp.p2.y=clamp(p.y, S.margin+pvp.p2.r, H/2-pvp.p2.r);
+    const p=toLocal(e);
+    if(TOUCH_ROLE.p1){
+      pvp.p1.x = clamp(p.x, 20, W-20);
+    }else if(TOUCH_ROLE.p2){
+      pvp.p2.x = clamp(p.x, 20, W-20);
     }
   });
 
@@ -1704,12 +1649,32 @@
     setMode(mode);
   });
 
+  // ==================== Timer / End ====================
+  let timeLeft=60;
+  function endByTime(){
+    running=false; paused=true; inEndScreen=true;
+
+    if(mode===MODES.solo){
+      const msg = `امتیاز: ${solo.score} | گل‌ها: ${solo.goals} | استریک بهترین: ${solo.bestStreak}`;
+      openOverlay("پایان زمان ⏱️", msg, "end");
+      if(ADS.showOnTimeEnd) showAd();
+    }else{
+      const msg = `نتیجه: ${pvp.s1} - ${pvp.s2}`;
+      openOverlay("پایان زمان ⏱️", msg, "end");
+      if(ADS.showOnTimeEnd) showAd();
+    }
+  }
+
   // ==================== Loop ====================
+  let lastT=performance.now();
   function tick(now){
     const dt = Math.min(0.033, (now-lastT)/1000) * slowmo;
     lastT=now;
 
     if(running && !paused){
+      timeLeft -= dt;
+      if(timeLeft<=0){ timeLeft=0; endByTime(); }
+
       if(mode===MODES.solo) soloUpdate(dt);
       else pvpUpdate(dt);
       syncUI();
