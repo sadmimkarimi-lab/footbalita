@@ -268,6 +268,47 @@
       55%{opacity:1;transform:translate(-50%,-50%) scale(1)}
       100%{opacity:0;transform:translate(-50%,-68%) scale(.96)}
     }
+
+    /* --- UI polish + PvP theater mode --- */
+    .btn.primary{
+      position:relative;
+      overflow:hidden;
+    }
+    .btn.primary::after{
+      content:"";
+      position:absolute; inset:-40% -60%;
+      background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), transparent 45%);
+      transform:translateX(-35%) rotate(10deg);
+      opacity:.28;
+      animation:primaryGlow 2.8s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes primaryGlow{
+      0%,100%{transform:translateX(-45%) rotate(10deg); opacity:.18}
+      50%{transform:translateX(35%) rotate(10deg); opacity:.32}
+    }
+
+    body.pvp-full .topbar,
+    body.pvp-full .panel,
+    body.pvp-full .hud,
+    body.pvp-full .hint { display:none !important; }
+
+    body.pvp-full .app{ max-width:100%; padding:0; gap:0; }
+    body.pvp-full .stage{
+      position:fixed; inset:0;
+      border-radius:0;
+      z-index:9990;
+      border:none;
+    }
+    .pvpBackBtn{
+      position:fixed;
+      top:10px;
+      left:10px;
+      z-index:9991;
+      display:none;
+    }
+    .pvpBackBtn.show{display:block;}
+
   </style>
 </head>
 
@@ -320,6 +361,8 @@
     روی توپ بکش و رها کن 🎯 گوشه‌ها بهترین هدف!
   </div>
 </div>
+
+<button class="btn pvpBackBtn" id="pvpBackBtn">⬅️ برگشت</button>
 
 <div class="toast" id="toast"></div>
 <div class="eventBanner neutral" id="eventBanner"></div>
@@ -480,7 +523,34 @@
   const goalFx=document.getElementById("goalFx");
   const goalFxText=document.getElementById("goalFxText");
   const stageEl=document.querySelector(".stage");
+  const pvpBackBtn = document.getElementById("pvpBackBtn");
+
+  function enterPvpFullscreen(){
+    document.body.classList.add("pvp-full");
+    if(pvpBackBtn) pvpBackBtn.classList.add("show");
+    try{
+      if(stageEl && stageEl.requestFullscreen) stageEl.requestFullscreen();
+    }catch(e){}
+    resize();
+  }
+
+  function exitPvpFullscreen(){
+    document.body.classList.remove("pvp-full");
+    if(pvpBackBtn) pvpBackBtn.classList.remove("show");
+    try{
+      if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+    }catch(e){}
+    resize();
+  }
+
   let slowmo=1;
+
+  if(pvpBackBtn){
+    pvpBackBtn.addEventListener("click", ()=>{
+      exitPvpFullscreen();
+      setMode(MODES.solo);
+    });
+  }
   
   function createConfetti(){
     const colors = ['#22c55e','#a3e635','#fbbf24','#f59e0b','#3b82f6','#8b5cf6','#ec4899'];
@@ -1055,49 +1125,138 @@
       solo._predictedAimX = null;
     }else{
       solo.shotAge += dt;
-      solo.ball.vy += 0.06*60*dt;
-      solo.ball.x += solo.ball.vx*60*dt;
-      solo.ball.y += solo.ball.vy*60*dt;
 
+      // physics
+      solo.ball.vy += 0.06*60*dt;                // gravity
+      solo.ball.x  += solo.ball.vx*60*dt;
+      solo.ball.y  += solo.ball.vy*60*dt;
+
+      // curve (spin)
       solo.ball.vx += solo.ball.spin * 0.07*60*dt;
       solo.ball.spin *= 0.992;
 
       updateTrail();
 
+      // walls
       if(solo.ball.x < solo.ball.r){ solo.ball.x=solo.ball.r; solo.ball.vx*=-0.7; }
       if(solo.ball.x > W-solo.ball.r){ solo.ball.x=W-solo.ball.r; solo.ball.vx*=-0.7; }
       if(solo.ball.y < solo.ball.r){ solo.ball.y=solo.ball.r; solo.ball.vy*=-0.7; }
 
+      // goal geometry
       const gx1=(W-S.soloGoalW)/2;
       const gx2=gx1+S.soloGoalW;
       const gy=S.margin+40;
-      const mouthY = gy + 2;
+      const crossbarY = gy;
+      const mouthY = gy + S.soloGoalH; // ✅ دهانه‌ی واقعی (لبه پایین فریم)
 
       const postLx = gx1;
       const postRx = gx2;
 
+      // keeper hitboxes
       const kx=solo.keeper._cx, ky=solo.keeper._cy;
       const body={x:kx-solo.keeper.w/2, y:ky-solo.keeper.h/2, w:solo.keeper.w, h:solo.keeper.h};
       const head={x:kx, y:ky-solo.keeper.h/2-solo.keeper.headR+2, r:solo.keeper.headR};
 
-      const crossbarY = gy;
-      const nearX = (solo.ball.x >= postLx - 6 && solo.ball.x <= postRx + 6);
-      const hitCrossbar = nearX && (Math.abs((solo.ball.y - solo.ball.r) - crossbarY) < 5) && solo.ball.vy < 0;
+      // smarter post / bar collision (smaller tolerance + speed-aware)
+      const speed = Math.hypot(solo.ball.vx, solo.ball.vy);
+      const tol = clamp(2 + speed * 0.15, 2, 4);
 
-      const hitLeftPost  = Math.abs((solo.ball.x - solo.ball.r) - postLx) < 5 && (solo.ball.y < mouthY+20);
-      const hitRightPost = Math.abs((solo.ball.x + solo.ball.r) - postRx) < 5 && (solo.ball.y < mouthY+20);
+      const nearX = (solo.ball.x >= postLx - 6 && solo.ball.x <= postRx + 6);
+      const hitCrossbar = nearX && Math.abs((solo.ball.y - solo.ball.r) - crossbarY) < tol && solo.ball.vy < 0;
+
+      const hitLeftPost  = Math.abs((solo.ball.x - solo.ball.r) - postLx) < tol &&
+                           (solo.ball.y - solo.ball.r) < (crossbarY + S.soloGoalH - 6);
+
+      const hitRightPost = Math.abs((solo.ball.x + solo.ball.r) - postRx) < tol &&
+                           (solo.ball.y - solo.ball.r) < (crossbarY + S.soloGoalH - 6);
 
       if(hitCrossbar || hitLeftPost || hitRightPost){
         sfxPost(); vibr(14); hype("🥶 تیر دروازه!","warn");
         solo.streak=0;
         soloNonGoalStreak++;
         if(soloNonGoalStreak>=2) showAd();
-        if(hitCrossbar) solo.ball.vy = Math.abs(solo.ball.vy) * 0.7;
-        if(hitLeftPost || hitRightPost) solo.ball.vx *= -0.8;
+
+        if(hitCrossbar) solo.ball.vy = Math.abs(solo.ball.vy) * 0.72;
+        if(hitLeftPost || hitRightPost) solo.ball.vx *= -0.82;
+
+        soloFinish("post"); // ✅ درست
+        return;
+      }
+
+      // keeper save
+      const hitBody = circleRectHit(solo.ball.x,solo.ball.y,solo.ball.r, body.x,body.y,body.w,body.h);
+      const hitHead = dist(solo.ball.x,solo.ball.y, head.x,head.y) <= (solo.ball.r+head.r);
+
+      if(solo.keeper.saveCooldown<=0 && (hitBody || hitHead)){
+        solo.streak=0;
+        soloNonGoalStreak++;
+        sfxSave(); vibr(20); hype("🧤 سیو توسط دروازه‌بان!","warn");
+        if(soloNonGoalStreak>=2) showAd();
+        soloFinish("save");
+        return;
+      }
+
+      // goal / miss line (we use mouthY as the goal line)
+      const insideMouthX = (solo.ball.x >= gx1+8 && solo.ball.x <= gx2-8);
+      const crossesMouth = (solo.ball.y - solo.ball.r) <= mouthY && solo.ball.vy < 0;
+
+      const g = keeperDifficulty();
+      const gxMid = gx1 + S.soloGoalW/2;
+      const centerHard = Math.abs(solo.ball.x - gxMid) < (S.soloGoalW * g.centerBias);
+      const strongEnough = speed > 4.2;
+
+      if(crossesMouth){
+        if(!insideMouthX){
+          solo.streak=0;
+          soloNonGoalStreak++;
+          sfxMiss(); vibr(18); hype("😅 اوت شد!","bad");
+          if(soloNonGoalStreak>=2) showAd();
+          soloFinish("miss");
+          return;
+        }
+
+        // weak central shots get punished (more realistic)
+        if(centerHard && !strongEnough){
+          solo.streak=0;
+          soloNonGoalStreak++;
+          sfxMiss(); hype("💨 ضعیف بود!","bad");
+          if(soloNonGoalStreak>=2) showAd();
+          soloFinish("weak");
+          return;
+        }
+
+        // strong but straight shots are more likely saved
+        if(centerHard && strongEnough && solo.keeper.diveT>0.25){
+          solo.streak=0;
+          soloNonGoalStreak++;
+          sfxSave(); hype("🧤 دروازه‌بان گرفت!","warn");
+          if(soloNonGoalStreak>=2) showAd();
+          soloFinish("center");
+          return;
+        }
+
+        // ✅ GOAL
+        solo.goals++;
+        solo.streak++;
+        solo.bestStreak=Math.max(solo.bestStreak, solo.streak);
+        soloNonGoalStreak=0;
+
+        const bonus = 10 + solo.streak*2;
+        const cornerBonus = centerHard ? 0 : 6;
+        solo.score += bonus + cornerBonus;
+
+        solo.ripple={x:solo.ball.x,y:mouthY+10,age:0};
+        spawnParticles(solo.ball.x, mouthY+10, "#22c55e", 22);
+
+        const hypeText = solo.streak>=4 ? `🔥🔥🔥 گل! (${solo.streak}x)` : `⚽ گل! +${bonus}`;
+        goalHype(hypeText);
+        if(solo.streak>=3) showCombo(`COMBO x${solo.streak}!`);
+
         soloFinish("goal");
         return;
       }
 
+      // late / out
       if(solo.ball.y > H + 60){
         solo.streak=0;
         soloNonGoalStreak++;
@@ -1246,8 +1405,8 @@
   const pvp = {
     s1:0,s2:0,maxGoals:4,
     ball:{x:0,y:0,r:10,vx:0,vy:0,spin:0,trail:[]},
-    p1:{x:0,y:0,r:18, color:"rgba(34,197,94,.95)"},
-    p2:{x:0,y:0,r:18, color:"rgba(59,130,246,.95)"},
+    p1:{x:0,y:0,r:18,vx:0, color:"rgba(34,197,94,.95)"},
+    p2:{x:0,y:0,r:18,vx:0, color:"rgba(59,130,246,.95)"},
     ripple:null,
     particles:[],
     lastTouch:null,
@@ -1260,8 +1419,8 @@
     pvp.ball.vx=pvp.ball.vy=0;
     pvp.ball.spin=0;
     pvp.ball.trail.length=0;
-    pvp.p1.x=W/2; pvp.p1.y=H-80;
-    pvp.p2.x=W/2; pvp.p2.y=80;
+    pvp.p1.x=W/2; pvp.p1.y=H-80; pvp.p1.vx=0;
+    pvp.p2.x=W/2; pvp.p2.y=80; pvp.p2.vx=0;
     pvp.ripple=null;
     pvp.particles.length=0;
     pvp.lastTouch=null;
@@ -1320,14 +1479,35 @@
       const d = dist(pvp.ball.x,pvp.ball.y, pl.x,pl.y);
       if(d <= pl.r + pvp.ball.r + 4){
         const ang = Math.atan2(pvp.ball.y-pl.y, pvp.ball.x-pl.x);
-        const sp = 6.5;
+
+        // ✅ ضربه طبیعی‌تر: قدرت وابسته به سرعت دست + کمی تنوع
+        const base = 5.6;
+        const add = clamp(Math.abs(pl.vx)/900, 0, 1) * 4.8;
+        const sp = base + add;
+
         pvp.ball.vx = Math.cos(ang)*sp;
         pvp.ball.vy = Math.sin(ang)*sp;
-        pvp.ball.spin += (Math.random()*2-1)*0.22;
+
+        // ✅ اسپین وابسته به حرکت بازیکن (کنترل‌پذیر)
+        pvp.ball.spin += clamp(pl.vx/2200, -0.35, 0.35);
+
+        // یک تلنگر کوچیک برای هیجان
+        pvp.ball.spin += (Math.random()*2-1)*0.06;
+
         pvp.lastTouch=id;
-        pvp.touchCooldown=0.08;
+        pvp.touchCooldown=0.085;
+
+        // UI pulse برای نوبت/لمس
+        try{
+          const pill = id===1 ? ui.p1Pill : ui.p2Pill;
+          pill.classList.remove("pulse");
+          void pill.offsetWidth;
+          pill.classList.add("pulse");
+          setTimeout(()=>pill.classList.remove("pulse"), 420);
+        }catch(_){}
+
         sfxKick(); vibr(12);
-        pvpSpawnParticles(pvp.ball.x,pvp.ball.y, id===1 ? "#22c55e" : "#3b82f6", 10);
+        pvpSpawnParticles(pvp.ball.x,pvp.ball.y, id===1 ? "#22c55e" : "#3b82f6", 12);
         return true;
       }
       return false;
@@ -1364,6 +1544,22 @@
       }else{
         sfxPost(); vibr(10); hype("🥶 تیرک!","warn");
         pvp.ball.vy*=-0.7;
+      }
+    }
+
+    // دیوار نرم بالا/پایین (به‌جز دهانه‌ی گل) تا بازی از صفحه فرار نکند
+    const mouthL = g1x+10, mouthR = g2x-10;
+
+    if(pvp.ball.y - pvp.ball.r < S.margin+8 && pvp.ball.vy < 0){
+      if(!(pvp.ball.x>=mouthL && pvp.ball.x<=mouthR)){
+        pvp.ball.y = S.margin+8 + pvp.ball.r;
+        pvp.ball.vy *= -0.78;
+      }
+    }
+    if(pvp.ball.y + pvp.ball.r > H - (S.margin+8) && pvp.ball.vy > 0){
+      if(!(pvp.ball.x>=mouthL && pvp.ball.x<=mouthR)){
+        pvp.ball.y = H - (S.margin+8) - pvp.ball.r;
+        pvp.ball.vy *= -0.78;
       }
     }
 
@@ -1424,6 +1620,8 @@
   const pointers=new Map();
   let drag={active:false,start:null,now:null};
   const TOUCH_ROLE = {p1:false,p2:false};
+  let lastMoveT1 = performance.now();
+  let lastMoveT2 = performance.now();
 
   cv.addEventListener("pointerdown",(e)=>{
     cv.setPointerCapture(e.pointerId);
@@ -1454,9 +1652,21 @@
     }
     const p=toLocal(e);
     if(TOUCH_ROLE.p1){
-      pvp.p1.x = clamp(p.x, 20, W-20);
+      const nowT = performance.now();
+      const dtm = Math.max(0.016, (nowT-lastMoveT1)/1000);
+      const prevX = pvp.p1.x;
+      const newX = clamp(p.x, 20, W-20);
+      pvp.p1.x = newX;
+      pvp.p1.vx = (newX - prevX) / dtm;
+      lastMoveT1 = nowT;
     }else if(TOUCH_ROLE.p2){
-      pvp.p2.x = clamp(p.x, 20, W-20);
+      const nowT = performance.now();
+      const dtm = Math.max(0.016, (nowT-lastMoveT2)/1000);
+      const prevX = pvp.p2.x;
+      const newX = clamp(p.x, 20, W-20);
+      pvp.p2.x = newX;
+      pvp.p2.vx = (newX - prevX) / dtm;
+      lastMoveT2 = nowT;
     }
   });
 
@@ -1485,6 +1695,8 @@
       return;
     }
     endPointer(e.pointerId);
+    TOUCH_ROLE.p1=false; TOUCH_ROLE.p2=false;
+    pvp.p1.vx*=0.3; pvp.p2.vx*=0.3;
   });
 
   cv.addEventListener("pointercancel",(e)=>{
@@ -1521,6 +1733,11 @@
 
   function setMode(m){
     mode=m;
+
+    // PvP را به حالت تمام‌صفحه ببر (بدون خراب کردن تبلیغات/ایتا)
+    if(m===MODES.pvp) enterPvpFullscreen();
+    else exitPvpFullscreen();
+
     ui.modeBtns.forEach(b=>b.classList.toggle("active", b.dataset.mode===m));
     paused=false; running=true; inEndScreen=false;
     closeOverlay(); hideAd();
@@ -1592,75 +1809,4 @@
 })();
 </script>
 </body>
-</html>("post");
-        return;
-      }
-
-      const hitBody = circleRectHit(solo.ball.x,solo.ball.y,solo.ball.r, body.x,body.y,body.w,body.h);
-      const hitHead = dist(solo.ball.x,solo.ball.y, head.x,head.y) <= (solo.ball.r+head.r);
-
-      if(solo.keeper.saveCooldown<=0 && (hitBody || hitHead)){
-        solo.streak=0;
-        soloNonGoalStreak++;
-        sfxSave(); vibr(20); hype("🧤 سیو توسط دروازه‌بان!","warn");
-        if(soloNonGoalStreak>=2) showAd();
-        soloFinish("save");
-        return;
-      }
-
-      const insideMouthX = (solo.ball.x >= gx1+8 && solo.ball.x <= gx2-8);
-      const crossesMouth = (solo.ball.y - solo.ball.r) <= mouthY && solo.ball.vy < 0;
-
-      const g = keeperDifficulty();
-      const gxMid = gx1 + S.soloGoalW/2;
-      const centerHard = Math.abs(solo.ball.x - gxMid) < (S.soloGoalW * g.centerBias);
-
-      const speed = Math.hypot(solo.ball.vx, solo.ball.vy);
-      const strongEnough = speed > 4.2;
-
-      if(crossesMouth){
-        if(!insideMouthX){
-          solo.streak=0;
-          soloNonGoalStreak++;
-          sfxMiss(); vibr(18); hype("😅 اوت شد!","bad");
-          if(soloNonGoalStreak>=2) showAd();
-          soloFinish("miss");
-          return;
-        }
-
-        if(centerHard && !strongEnough){
-          solo.streak=0;
-          soloNonGoalStreak++;
-          sfxMiss(); hype("💨 ضعیف بود!","bad");
-          if(soloNonGoalStreak>=2) showAd();
-          soloFinish("weak");
-          return;
-        }
-
-        if(centerHard && strongEnough && solo.keeper.diveT>0.25){
-          solo.streak=0;
-          soloNonGoalStreak++;
-          sfxSave(); hype("🧤 دروازه‌بان گرفت!","warn");
-          if(soloNonGoalStreak>=2) showAd();
-          soloFinish("center");
-          return;
-        }
-
-        // GOAL
-        solo.goals++;
-        solo.streak++;
-        solo.bestStreak=Math.max(solo.bestStreak, solo.streak);
-        soloNonGoalStreak=0;
-
-        const bonus = 10 + solo.streak*2;
-        const cornerBonus = centerHard ? 0 : 6;
-        solo.score += bonus + cornerBonus;
-
-        solo.ripple={x:solo.ball.x,y:mouthY+10,age:0};
-        spawnParticles(solo.ball.x, mouthY+10, "#22c55e", 22);
-
-        const hypeText = solo.streak>=4 ? `🔥🔥🔥 گل! (${solo.streak}x)` : `⚽ گل! +${bonus}`;
-        goalHype(hypeText);
-        if(solo.streak>=3) showCombo(`COMBO x${solo.streak}!`);
-
-        soloFinish
+</html>
